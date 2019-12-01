@@ -44,3 +44,8 @@ npm start
 ```
 npm run package
 ```
+
+### TODO
+
+- 打包 ico 图标不生效
+- 打包 asar 模式下找不到 ffmpeg
