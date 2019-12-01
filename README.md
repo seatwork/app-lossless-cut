@@ -26,7 +26,14 @@ https://github.com/seatwork/lossless-cut/releases
 npm install --save-dev electron
 ```
 
-#### 3. 生成桌面应用
+#### 3. 调试
+
+在项目目录下运行如下命令：
+```
+npm start
+```
+
+#### 4. 打包
 
 由于 `package.json` 中已经集成了打包命令所需参数，因此在项目目录下运行以下命令即可生成绿色版软件：
 ```
