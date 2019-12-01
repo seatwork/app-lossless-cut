@@ -23,6 +23,7 @@ module.exports = {
 
     let suffix = ('-' + startTime + '-' + endTime).replace(/:/g, '.')
     let filename = videoPath + suffix + path.extname(videoPath)
+    loading(true)
 
     ffmpeg(videoPath)
     .setFfmpegPath(ffmpegPath)
@@ -31,9 +32,6 @@ module.exports = {
     .audioCodec('copy') // Audio lossless
     .videoCodec('copy') // Video lossless
     .save(filename)
-    .on('start', function() {
-      loading(true)
-    })
     .on('end', function() {
       loading(false)
     })
@@ -47,15 +45,13 @@ module.exports = {
     const mergedFile = videoPaths[0] + '-merged' + path.extname(videoPaths[0])
     const concatTxt = videoPaths.map(path => "file '" + path + "'").join('\n')
     fs.writeFileSync(listFile, concatTxt)
+    loading(true)
 
     ffmpeg().input(listFile)
     .setFfmpegPath(ffmpegPath)
     .inputOptions(['-f concat', '-safe 0'])
     .outputOptions('-c copy')
     .save(mergedFile)
-    .on('start', function() {
-      loading(true)
-    })
     .on('end', function() {
       loading(false)
       fs.unlinkSync(listFile)
@@ -67,6 +63,8 @@ module.exports = {
   },
 
   captureImage(videoPath, timestamp) {
+    loading(true)
+
     ffmpeg(videoPath)
     .setFfmpegPath(ffmpegPath)
     .screenshots({
@@ -74,19 +72,23 @@ module.exports = {
       filename: 'thumbnail-' + timestamp + '.png',
       folder: path.dirname(videoPath),
     })
+    .on('end', function() {
+      loading(false)
+    })
+    .on('error', function(err) {
+      alert(err.message)
+    })
   },
 
   extractAudio(videoPath) {
     let filename = videoPath.replace(path.extname(videoPath), '.mp3')
+    loading(true)
 
     ffmpeg(videoPath)
     .setFfmpegPath(ffmpegPath)
     .noVideo()
     .audioCodec('libmp3lame')
     .save(filename)
-    .on('start', function() {
-      loading(true)
-    })
     .on('end', function() {
       loading(false)
     })
