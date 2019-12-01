@@ -205,7 +205,7 @@ document.onkeyup = function(e) {
 }
 
 $('.help').onclick = function() {
-  electron.shell.openExternal('http://electron.atom.io')
+  electron.shell.openExternal('https://github.com/seatwork/lossless-cut')
 }
 
 /* --------------------------------------------------------
