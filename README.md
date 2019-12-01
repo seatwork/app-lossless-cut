@@ -26,6 +26,11 @@ https://github.com/seatwork/lossless-cut/releases
 npm install --save-dev electron
 ```
 
+安装依赖：
+```
+npm install fluent-ffmpeg
+```
+
 #### 3. 调试
 
 在项目目录下运行如下命令：
