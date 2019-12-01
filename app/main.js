@@ -21,6 +21,8 @@ function createWindow() {
 
   // Create the browser window.
   mainWindow = new BrowserWindow({
+    width: 780, // Make sure the aspect ratio of video is 16:9
+    height: 600,
     icon: path.join(__dirname, 'assets/logo.ico'),
     webPreferences: {
       nodeIntegration: true, // Make sure integrate node in renderer.js
