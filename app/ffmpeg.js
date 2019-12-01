@@ -47,6 +47,7 @@ module.exports = {
     fs.writeFileSync(listFile, concatTxt)
     loading(true)
 
+    // mergeToFile() doesnot support codec copy
     ffmpeg().input(listFile)
     .setFfmpegPath(ffmpegPath)
     .inputOptions(['-f concat', '-safe 0'])
