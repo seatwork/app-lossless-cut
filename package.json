@@ -1,0 +1,19 @@
+{
+  "name": "Lossless-Cut",
+  "version": "1.0.0",
+  "description": "Lossless video cutter and merger",
+  "author": "AiChen",
+  "copyright": "Copyright (C) 2019, Cloudseat",
+  "license": "MIT",
+  "main": "app/main.js",
+  "scripts": {
+    "start": "electron .",
+    "package": "electron-packager . --icon=./assets/logo.ico --app-version=1.0.0 --overwrite"
+  },
+  "devDependencies": {
+    "electron": "^7.1.2"
+  },
+  "dependencies": {
+    "fluent-ffmpeg": "^2.1.2"
+  }
+}

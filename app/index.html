@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="./main.css">
+  </head>
+
+  <body>
+    <main>
+      <video></video>
+      <div id="open-file">Open or Drop Video</div>
+    </main>
+
+    <div class="toolbar">
+      <div class="timeline">
+        <span id="currentTime">00:00:00.000</span> / <span id="duration">00:00:00.000</span>
+        <div id="segment"></div>
+        <div id="progress"></div>
+      </div>
+
+      <div class="controls">
+        <button class="video-start" disabled></button>
+        <button class="segment-start" disabled></button>
+        <input id="cut-start-time" maxlength="12" value="00:00:00.000" disabled/>
+
+        <button class="cut-start" disabled></button>
+        <button class="play" disabled></button>
+        <button class="cut-end" disabled></button>
+
+        <input id="cut-end-time" maxlength="12" value="00:00:00.000" disabled/>
+        <button class="segment-end" disabled></button>
+        <button class="video-end" disabled></button>
+      </div>
+
+      <div class="features">
+        <button class="capture" disabled></button>
+        <button class="extract" disabled></button>
+        <button class="cut" disabled></button>
+        <button class="open-files"></button>
+        <button class="help"></button>
+      </div>
+    </div>
+
+    <div class="merger">
+      <ol></ol>
+      <div>
+        <button class="merge">Merge</button>
+        <button class="cancel">Cancel</button>
+      </div>
+    </div>
+
+    <div class="loading"></div>
+    <div class="message"><div></div></div>
+    <script src="./renderer.js"></script>
+  </body>
+</html>

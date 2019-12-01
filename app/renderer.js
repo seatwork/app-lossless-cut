@@ -1,0 +1,244 @@
+/**
+ * --------------------------------------------------------
+ * Renderer Process
+ * Author: Aichen
+ * Copyright (c) 2019 Cloudseat.net
+ * --------------------------------------------------------
+ */
+
+const electron = require('electron')
+const path = require('path')
+const util = require('./util')
+const ffmpeg = require('./ffmpeg')
+const { alert, loading } = require('./component')
+const { dialog } = electron.remote
+
+const video = $('video')
+const openFileBtn = $('#open-file')
+const currentTime = $('#currentTime')
+const timeline = $('.timeline')
+const duration = $('#duration')
+const progress = $('#progress')
+const segment = $('#segment')
+const cutStartTime = $('#cut-start-time')
+const cutEndTime = $('#cut-end-time')
+const playBtn = $('.play')
+const videoStartBtn = $('.video-start')
+const videoEndBtn = $('.video-end')
+const segmentStartBtn = $('.segment-start')
+const segmentEndBtn = $('.segment-end')
+const cutStartBtn = $('.cut-start')
+const cutEndBtn = $('.cut-end')
+const captureBtn = $('.capture')
+const extractBtn = $('.extract')
+const cutBtn = $('.cut')
+const openFilesBtn = $('.open-files')
+const merger = $('.merger')
+const fileList = $('.merger ol')
+const mergeBtn = $('.merge')
+const cancelBtn = $('.cancel')
+
+let videoPath, videoPaths
+
+/* --------------------------------------------------------
+ * Renderer Events
+ * ----------------------------------------------------- */
+
+openFileBtn.ondragover = function(e) {
+  return false
+}
+
+openFileBtn.ondragenter = function(e) {
+  e.preventDefault()
+  this.classList.add('ondrag')
+}
+
+openFileBtn.ondragleave = function(e) {
+  e.preventDefault()
+  this.classList.remove('ondrag')
+}
+
+openFileBtn.ondrop = function(e) {
+  e.preventDefault()
+  let path = e.dataTransfer.files[0].path
+  if (path) video.src = videoPath = path
+}
+
+openFileBtn.onclick = async function() {
+  const { canceled, filePaths } = await dialog.showOpenDialog({ properties: ['openFile'] })
+  if (!canceled && filePaths && filePaths.length == 1) {
+    video.src = videoPath = filePaths[0]
+  }
+}
+
+openFilesBtn.onclick = async function() {
+  const { canceled, filePaths } = await dialog.showOpenDialog({
+    title: 'Please select files to be merged',
+    message: 'Please select files to be merged. The files need to be of the exact same format and codecs',
+    properties: ['openFile', 'multiSelections'],
+  })
+
+  if (!canceled && filePaths && filePaths.length > 1) {
+    merger.style.display = 'flex'
+    fileList.innerHTML = ''
+    videoPaths = filePaths
+
+    filePaths.forEach(filePath => {
+      let item = document.createElement('li')
+      item.innerHTML = path.basename(filePath)
+      fileList.appendChild(item)
+    })
+  }
+}
+
+playBtn.onclick = play = function() {
+  if (video.paused) {
+    video.play()
+    playBtn.className = 'pause'
+  } else {
+    video.pause()
+    playBtn.className = 'play'
+  }
+}
+
+cutBtn.onclick = function() {
+  ffmpeg.cutVideo(videoPath, cutStartTime.value, cutEndTime.value)
+}
+
+captureBtn.onclick = function() {
+  ffmpeg.captureImage(videoPath, video.currentTime)
+}
+
+extractBtn.onclick = function() {
+  ffmpeg.extractAudio(videoPath)
+}
+
+mergeBtn.onclick = function() {
+  ffmpeg.mergeVideos(videoPaths)
+}
+
+cancelBtn.onclick = function() {
+  merger.style.display = 'none'
+}
+
+timeline.onclick = function(e) {
+  if (!video.duration) return
+  let currentTime = video.duration * (e.clientX / this.offsetWidth)
+  video.currentTime = currentTime
+}
+
+cutStartBtn.onclick = function() {
+  cutStartTime.value = util.formatDuration(video.currentTime)
+  setSegment()
+}
+
+cutEndBtn.onclick = function() {
+  cutEndTime.value = util.formatDuration(video.currentTime)
+  setSegment()
+}
+
+segmentStartBtn.onclick = function() {
+  let time = util.parseDuration(cutStartTime.value)
+  if (time !== undefined) video.currentTime = time
+}
+
+segmentEndBtn.onclick = function() {
+  let time = util.parseDuration(cutEndTime.value)
+  if (time !== undefined) video.currentTime = time
+}
+
+videoStartBtn.onclick = function() {
+  video.currentTime = 0
+}
+
+videoEndBtn.onclick = function() {
+  video.currentTime = video.duration
+}
+
+cutStartTime.oninput = cutEndTime.oninput = function onTimeChange() {
+  let time = util.parseDuration(this.value)
+  if (time !== undefined) {
+    video.currentTime = time
+    setSegment()
+  }
+}
+
+video.onloadstart = function() {
+  loading(true)
+}
+
+video.onloadedmetadata = function() {
+  duration.innerHTML = cutEndTime.value = util.formatDuration(this.duration)
+}
+
+video.oncanplay = function() {
+  loading(false)
+  disableBtns(false)
+  openFileBtn.style.opacity = 0
+}
+
+video.onerror = function(e) {
+  alert('Unsupported video format')
+  loading(false)
+  disableBtns(true)
+  progress.style.left = 0
+  openFileBtn.style.opacity = 1
+  segment.style.left = 0
+  segment.style.right = '100%'
+  playBtn.className = 'play'
+  duration.innerHTML = '00:00:00.000'
+  cutStartTime.value = '00:00:00.000'
+  cutEndTime.value = '00:00:00.000'
+}
+
+video.ontimeupdate = function() {
+  currentTime.innerHTML = util.formatDuration(video.currentTime)
+  progress.style.left = (video.currentTime / video.duration) * 100 + '%'
+}
+
+document.onkeyup = function(e) {
+  e.preventDefault()
+  if (!video.duration) return
+  if (e.keyCode === 32) return play()   // SPACE
+  if (e.keyCode === 37) return seek(-1) // LEFT
+  if (e.keyCode === 39) return seek(1)  // RIGHT
+}
+
+$('.help').onclick = function() {
+  electron.shell.openExternal('http://electron.atom.io')
+}
+
+/* --------------------------------------------------------
+ * Private Methods
+ * ----------------------------------------------------- */
+
+function setSegment() {
+  segment.style.left = (util.parseDuration(cutStartTime.value) / video.duration) * 100 + '%'
+  segment.style.right = (100 - (util.parseDuration(cutEndTime.value) / video.duration) * 100) + '%'
+}
+
+function seek(sec) {
+  let val = video.currentTime + sec
+  if (val < 0) val = 0
+  if (val > video.duration) val = video.duration
+  video.currentTime = val
+}
+
+function disableBtns(bool) {
+  playBtn.disabled = bool
+  videoStartBtn.disabled = bool
+  videoEndBtn.disabled = bool
+  segmentStartBtn.disabled = bool
+  segmentEndBtn.disabled = bool
+  cutStartBtn.disabled = bool
+  cutEndBtn.disabled = bool
+  cutStartTime.disabled = bool
+  cutEndTime.disabled = bool
+  captureBtn.disabled = bool
+  extractBtn.disabled = bool
+  cutBtn.disabled = bool
+}
+
+function $(selector) {
+  return document.querySelector(selector)
+}
