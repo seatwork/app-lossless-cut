@@ -2,17 +2,18 @@
 
 当前项目源自另一个无损分割程序 [LosslessCut](https://github.com/mifi/lossless-cut)，起因是想改善LosslessCut的UI界面，该项目的Issue中也曾经提到新UI的计划，但始终未见升级。适逢近日正在学习Electron，便以此练手，开发了功能类似的Lossless-Cut应用软件。与原软件相比，当前软件除UI优化以外，也去除了一些不常用的操作，增加了提取音频功能。感谢 [LosslessCut](https://github.com/mifi/lossless-cut) 作者的贡献，尽管当前项目在代码方面几乎进行了重写，但依然借鉴了他的诸多实践。
 
-### 快捷键
-
+### 一. 快捷键
+```
 SPACE 播放/暂停
 ->    播放下一秒
 <-    播放上一秒
+```
 
-### 下载
+### 二. 下载
 
 https://github.com/seatwork/lossless-cut/releases
 
-### 编译
+### 三. 编译
 
 #### 1. 安装 Node
 
