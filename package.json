@@ -8,12 +8,12 @@
   "main": "app/main.js",
   "scripts": {
     "start": "electron .",
-    "package": "electron-packager . --icon=app/assets/logo.ico --app-version=1.0.0 --overwrite"
+    "package": "electron-packager . --icon=app/assets/logo.ico --asar --app-version=1.0.0 --overwrite"
   },
   "devDependencies": {
     "electron": "^7.1.2"
   },
   "dependencies": {
-    "fluent-ffmpeg": "^2.1.2"
+    "string-to-stream": "^3.0.1"
   }
 }

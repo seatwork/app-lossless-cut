@@ -6,95 +6,59 @@
  * --------------------------------------------------------
  */
 
-const fs = require('fs')
-const path = require('path')
-const ffmpeg = require('fluent-ffmpeg')
+const { execFile } = require('child_process')
+const stringToStream = require('string-to-stream')
 const ffmpegPath = path.join(__dirname, 'assets/ffmpeg.exe')
+
+function ffmpeg(args) {
+  loading(true)
+  return execFile(ffmpegPath, args, (error, stdout, stderr) => {
+    loading(false)
+    if (error) alert(error)
+  })
+}
 
 module.exports = {
 
   cutVideo(videoPath, startTime, endTime) {
-    let startSecs = util.parseDuration(startTime)
-    let endSecs = util.parseDuration(endTime)
+    const startSecs = util.parseDuration(startTime)
+    const endSecs = util.parseDuration(endTime)
     if (startSecs >= endSecs) {
       alert('Start time cannot be later than end time')
       return
     }
 
-    let suffix = ('-' + startTime + '-' + endTime).replace(/:/g, '.')
-    let filename = videoPath + suffix + path.extname(videoPath)
-    loading(true)
-
-    ffmpeg(videoPath)
-    .setFfmpegPath(ffmpegPath)
-    .setStartTime(startSecs)
-    .setDuration(endSecs - startSecs)
-    .audioCodec('copy') // Audio lossless
-    .videoCodec('copy') // Video lossless
-    .save(filename)
-    .on('end', function() {
-      loading(false)
-    })
-    .on('error', function(err) {
-      alert(err.message)
-    })
+    const suffix = ('-' + startTime + '-' + endTime).replace(/:/g, '.')
+    const outputFile = videoPath + suffix + path.extname(videoPath)
+    ffmpeg([
+      '-i', videoPath, '-ss', startSecs, '-t', endSecs - startSecs,
+      '-vcodec', 'copy', '-acodec', 'copy', '-y', outputFile
+    ])
   },
 
   mergeVideos(videoPaths) {
-    const listFile = 'merge-list.txt'
-    const mergedFile = videoPaths[0] + '-merged' + path.extname(videoPaths[0])
-    const concatTxt = videoPaths.map(path => "file '" + path + "'").join('\n')
-    fs.writeFileSync(listFile, concatTxt)
-    loading(true)
+    const outputFile = videoPaths[0] + '-merged' + path.extname(videoPaths[0])
+    const process = ffmpeg([
+      '-f', 'concat', '-safe', '0', '-protocol_whitelist', 'file,pipe',
+      '-i', '-', '-c', 'copy', '-y', outputFile,
+    ])
 
-    // mergeToFile() doesnot support codec copy
-    ffmpeg().input(listFile)
-    .setFfmpegPath(ffmpegPath)
-    .inputOptions(['-f concat', '-safe 0'])
-    .outputOptions('-c copy')
-    .save(mergedFile)
-    .on('end', function() {
-      loading(false)
-      fs.unlinkSync(listFile)
-    })
-    .on('error', function(err) {
-      alert(err.message)
-      fs.unlinkSync(listFile)
-    })
+    const videoList = videoPaths.map(path => "file '" + path + "'").join('\n')
+    stringToStream(videoList).pipe(process.stdin)
   },
 
   captureImage(videoPath, timestamp) {
-    loading(true)
-
-    ffmpeg(videoPath)
-    .setFfmpegPath(ffmpegPath)
-    .screenshots({
-      timestamps: [timestamp],
-      filename: 'thumbnail-' + timestamp + '.png',
-      folder: path.dirname(videoPath),
-    })
-    .on('end', function() {
-      loading(false)
-    })
-    .on('error', function(err) {
-      alert(err.message)
-    })
+    const outputFile = videoPath + '-' + timestamp + '.jpg'
+    ffmpeg([
+      '-ss', timestamp, '-i', videoPath, '-vframes', 1,
+      '-f', 'image2', '-q:v', '2', '-y', outputFile
+    ])
   },
 
   extractAudio(videoPath) {
-    let filename = videoPath.replace(path.extname(videoPath), '.mp3')
-    loading(true)
-
-    ffmpeg(videoPath)
-    .setFfmpegPath(ffmpegPath)
-    .noVideo()
-    .audioCodec('libmp3lame')
-    .save(filename)
-    .on('end', function() {
-      loading(false)
-    })
-    .on('error', function(err) {
-      alert(err.message)
-    })
+    const outputFile = videoPath.replace(path.extname(videoPath), '.aac')
+    ffmpeg([
+      '-i', videoPath, '-acodec', 'copy', '-vn', '-y', outputFile
+    ])
   }
 }

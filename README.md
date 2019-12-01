@@ -46,7 +46,3 @@ npm start
 ```
 npm run package
 ```
-
-## 四. TODO
-
-- 打包 asar 模式下找不到 ffmpeg
