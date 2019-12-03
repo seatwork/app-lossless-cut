@@ -6,8 +6,9 @@
  * --------------------------------------------------------
  */
 
-const { execFile } = require('child_process')
+const fs = require('fs')
 const stringToStream = require('string-to-stream')
+const { execFile } = require('child_process')
 const ffmpegPath = path.join(__dirname, 'assets/ffmpeg.exe')
 
 function ffmpeg(args) {
@@ -60,5 +61,27 @@ module.exports = {
     ffmpeg([
       '-i', videoPath, '-acodec', 'copy', '-vn', '-y', outputFile
     ])
+  },
+
+  fastCodec(videoPath, startTime) {
+    startTime = startTime || 0
+    const file = fs.statSync(videoPath)
+
+    return execFile(ffmpegPath, [
+      '-ss', startTime, '-i', videoPath, '-preset', 'ultrafast',
+      '-f', 'mp4', '-movflags', 'frag_keyframe+empty_moov', 'pipe:1',
+    ], {
+      encoding: 'buffer', maxBuffer: file.size
+    })
+  },
+
+  getDuration(videoPath) {
+    return new Promise(resolve => {
+      execFile(ffmpegPath, ['-i', videoPath, '-'], (error, stdout, stderr) => {
+        const match = /Duration\: ([0-9\:\.]+),/.exec(stderr)
+        resolve(match ? util.parseDuration(match[1]) : 0)
+      })
+    })
   }
+
 }

@@ -11,6 +11,18 @@ function padStart(num, length) {
 }
 
 module.exports = {
+  parseQuery(queryString) {
+    const index = queryString.indexOf('?')
+    queryString = index > -1 ? queryString.substring(index+1) : queryString
+
+    let result = {}
+    const params = queryString.split('&')
+    params.forEach(param => {
+      let item = param.split('=')
+      result[item[0]] = decodeURI(item[1])
+    })
+    return result
+  },
 
   formatDuration(_seconds) {
     const seconds = _seconds || 0
@@ -27,7 +39,7 @@ module.exports = {
 
   parseDuration(str) {
     if (!str) return
-    const match = str.trim().match(/^(\d{2}):(\d{2}):(\d{2})\.(\d{3})$/)
+    const match = str.trim().match(/^(\d{2}):(\d{2}):(\d{2})\.(\d{2,3})$/)
 
     if (!match) return
     const hours = parseInt(match[1], 10)

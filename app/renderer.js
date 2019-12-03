@@ -13,7 +13,6 @@ const ffmpeg = require('./ffmpeg')
 const { alert, loading } = require('./component')
 const { dialog } = electron.remote
 
-const video = $('video')
 const openFileBtn = $('#open-file')
 const currentTime = $('#currentTime')
 const timeline = $('.timeline')
@@ -38,7 +37,8 @@ const fileList = $('.merger ol')
 const mergeBtn = $('.merge')
 const cancelBtn = $('.cancel')
 
-let videoPath, videoPaths
+const video = $('video')
+Object.assign(video, require('./video'))
 
 /* --------------------------------------------------------
  * Renderer Events
@@ -61,13 +61,13 @@ openFileBtn.ondragleave = function(e) {
 openFileBtn.ondrop = function(e) {
   e.preventDefault()
   let path = e.dataTransfer.files[0].path
-  if (path) video.src = videoPath = path
+  if (path) video.setSource(path)
 }
 
 openFileBtn.onclick = async function() {
   const { canceled, filePaths } = await dialog.showOpenDialog({ properties: ['openFile'] })
   if (!canceled && filePaths && filePaths.length == 1) {
-    video.src = videoPath = filePaths[0]
+    video.setSource(filePaths[0])
   }
 }
 
@@ -81,7 +81,7 @@ openFilesBtn.onclick = async function() {
   if (!canceled && filePaths && filePaths.length > 1) {
     merger.style.display = 'flex'
     fileList.innerHTML = ''
-    videoPaths = filePaths
+    video.sources = filePaths
 
     filePaths.forEach(filePath => {
       let item = document.createElement('li')
@@ -102,19 +102,19 @@ playBtn.onclick = play = function() {
 }
 
 cutBtn.onclick = function() {
-  ffmpeg.cutVideo(videoPath, cutStartTime.value, cutEndTime.value)
+  ffmpeg.cutVideo(video.source, cutStartTime.value, cutEndTime.value)
 }
 
 captureBtn.onclick = function() {
-  ffmpeg.captureImage(videoPath, video.currentTime)
+  ffmpeg.captureImage(video.source, video.getCurrentTime())
 }
 
 extractBtn.onclick = function() {
-  ffmpeg.extractAudio(videoPath)
+  ffmpeg.extractAudio(video.source)
 }
 
 mergeBtn.onclick = function() {
-  ffmpeg.mergeVideos(videoPaths)
+  ffmpeg.mergeVideos(video.sources)
 }
 
 cancelBtn.onclick = function() {
@@ -122,65 +122,104 @@ cancelBtn.onclick = function() {
 }
 
 timeline.onclick = function(e) {
-  if (!video.duration) return
-  let currentTime = video.duration * (e.clientX / this.offsetWidth)
-  video.currentTime = currentTime
+  if (video.getDuration() !== undefined)
+  video.seek(video.getDuration() * (e.clientX / this.offsetWidth))
 }
 
 cutStartBtn.onclick = function() {
-  cutStartTime.value = util.formatDuration(video.currentTime)
+  cutStartTime.value = util.formatDuration(video.getCurrentTime())
   setSegment()
 }
 
 cutEndBtn.onclick = function() {
-  cutEndTime.value = util.formatDuration(video.currentTime)
+  cutEndTime.value = util.formatDuration(video.getCurrentTime())
   setSegment()
 }
 
 segmentStartBtn.onclick = function() {
-  let time = util.parseDuration(cutStartTime.value)
-  if (time !== undefined) video.currentTime = time
+  video.seek(util.parseDuration(cutStartTime.value))
 }
 
 segmentEndBtn.onclick = function() {
-  let time = util.parseDuration(cutEndTime.value)
-  if (time !== undefined) video.currentTime = time
+  video.seek(util.parseDuration(cutEndTime.value))
 }
 
 videoStartBtn.onclick = function() {
-  video.currentTime = 0
+  video.seek(0)
 }
 
 videoEndBtn.onclick = function() {
-  video.currentTime = video.duration
+  video.seek(video.getDuration())
 }
 
 cutStartTime.oninput = cutEndTime.oninput = function onTimeChange() {
-  let time = util.parseDuration(this.value)
-  if (time !== undefined) {
-    video.currentTime = time
-    setSegment()
-  }
+  video.seek(util.parseDuration(this.value))
+  setSegment()
 }
+
+$('.help').onclick = function() {
+  electron.shell.openExternal('https://github.com/seatwork/lossless-cut')
+}
+
+document.onkeyup = function(e) {
+  e.preventDefault()
+  if (video.getDuration() === undefined) return
+  if (e.keyCode === 32) return play()   // SPACE
+  if (e.keyCode === 37) return video.seek(video.getCurrentTime() - 1)  // LEFT
+  if (e.keyCode === 39) return video.seek(video.getCurrentTime() + 1)  // RIGHT
+}
+
+/* --------------------------------------------------------
+ * Video Events
+ * ----------------------------------------------------- */
 
 video.onloadstart = function() {
   loading(true)
 }
 
-video.onloadedmetadata = function() {
-  duration.innerHTML = cutEndTime.value = util.formatDuration(this.duration)
+video.onceloaded = function() {
+  duration.innerHTML = cutEndTime.value = util.formatDuration(video.getDuration())
 }
 
 video.oncanplay = function() {
   loading(false)
   disableBtns(false)
   openFileBtn.style.opacity = 0
+  segment.style.left = 0
+  segment.style.right = '100%'
+}
+
+video.ontimeupdate = function() {
+  currentTime.innerHTML = util.formatDuration(video.getCurrentTime())
+  progress.style.left = (video.getCurrentTime() / video.getDuration()) * 100 + '%'
+}
+
+video.onended = function() {
+  video.pause()
+  playBtn.className = 'play'
 }
 
 video.onerror = function(e) {
-  alert('Unsupported video format')
-  loading(false)
-  disableBtns(true)
+  if (video.isTranscoded) {
+    alert('Unsupported video format')
+    resetControls()
+    loading(false)
+    disableBtns(true)
+  } else {
+    video.transcode()
+  }
+}
+
+/* --------------------------------------------------------
+ * Private Methods
+ * ----------------------------------------------------- */
+
+function setSegment() {
+  segment.style.left = (util.parseDuration(cutStartTime.value) / video.getDuration()) * 100 + '%'
+  segment.style.right = (100 - (util.parseDuration(cutEndTime.value) / video.getDuration()) * 100) + '%'
+}
+
+function resetControls() {
   progress.style.left = 0
   openFileBtn.style.opacity = 1
   segment.style.left = 0
@@ -189,39 +228,6 @@ video.onerror = function(e) {
   duration.innerHTML = '00:00:00.000'
   cutStartTime.value = '00:00:00.000'
   cutEndTime.value = '00:00:00.000'
-}
-
-video.ontimeupdate = function() {
-  currentTime.innerHTML = util.formatDuration(video.currentTime)
-  progress.style.left = (video.currentTime / video.duration) * 100 + '%'
-}
-
-document.onkeyup = function(e) {
-  e.preventDefault()
-  if (!video.duration) return
-  if (e.keyCode === 32) return play()   // SPACE
-  if (e.keyCode === 37) return seek(-1) // LEFT
-  if (e.keyCode === 39) return seek(1)  // RIGHT
-}
-
-$('.help').onclick = function() {
-  electron.shell.openExternal('https://github.com/seatwork/lossless-cut')
-}
-
-/* --------------------------------------------------------
- * Private Methods
- * ----------------------------------------------------- */
-
-function setSegment() {
-  segment.style.left = (util.parseDuration(cutStartTime.value) / video.duration) * 100 + '%'
-  segment.style.right = (100 - (util.parseDuration(cutEndTime.value) / video.duration) * 100) + '%'
-}
-
-function seek(sec) {
-  let val = video.currentTime + sec
-  if (val < 0) val = 0
-  if (val > video.duration) val = video.duration
-  video.currentTime = val
 }
 
 function disableBtns(bool) {
