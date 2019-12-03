@@ -31,9 +31,13 @@ module.exports = {
 
     const suffix = ('-' + startTime + '-' + endTime).replace(/:/g, '.')
     const outputFile = videoPath + suffix + path.extname(videoPath)
+
+    // -i 放在 -ss 之前表示不使用关键帧技术；-i 放在 -ss 之后表示使用关键帧技术
+    // 不使用关键帧剪切后视频开头可能存在几秒定格画面；使用关键帧截取速度快，但时间不精确，
+    // 并且如果结尾不是关键帧，则可能出现一段空白（参数 avoid_negative_ts 可解决）
     ffmpeg([
-      '-i', videoPath, '-ss', startSecs, '-t', endSecs - startSecs,
-      '-vcodec', 'copy', '-acodec', 'copy', '-y', outputFile
+      '-ss', startSecs, '-t', endSecs - startSecs, '-accurate_seek', '-i', videoPath,
+      '-vcodec', 'copy', '-acodec', 'copy', '-avoid_negative_ts', 1, '-y', outputFile
     ])
   },
 
@@ -67,9 +71,10 @@ module.exports = {
     startTime = startTime || 0
     const file = fs.statSync(videoPath)
 
+    // -frag_duration: Create fragments that are duration microseconds long.
     return execFile(ffmpegPath, [
       '-ss', startTime, '-i', videoPath, '-preset:v', 'ultrafast',
-      '-f', 'mp4', '-movflags', 'frag_keyframe+empty_moov', 'pipe:1',
+      '-f', 'mp4', '-frag_duration', 1000000, 'pipe:1',
     ], {
       encoding: 'buffer', maxBuffer: file.size
     })
