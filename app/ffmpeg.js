@@ -68,7 +68,7 @@ module.exports = {
     const file = fs.statSync(videoPath)
 
     return execFile(ffmpegPath, [
-      '-ss', startTime, '-i', videoPath, '-preset', 'ultrafast',
+      '-ss', startTime, '-i', videoPath, '-preset:v', 'ultrafast',
       '-f', 'mp4', '-movflags', 'frag_keyframe+empty_moov', 'pipe:1',
     ], {
       encoding: 'buffer', maxBuffer: file.size

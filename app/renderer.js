@@ -215,6 +215,7 @@ video.onerror = function(e) {
     disableBtns(true)
     resetControls()
   } else {
+    alert('This video needs transcoding, playback will be slower')
     video.transcode()
   }
 }
