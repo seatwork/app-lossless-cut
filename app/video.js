@@ -14,8 +14,9 @@ module.exports = {
   setSource(source) {
     this.source = source
     this.src = source
-    this.isLoaded = false
+    this.isFirstLoaded = true
     this.isTranscoded = false
+    this.timespan = undefined
     this.startTime = 0
   },
 
@@ -28,10 +29,10 @@ module.exports = {
   },
 
   async onloadedmetadata() {
-    if (!this.isLoaded) {
-      this.isLoaded = true
+    if (this.isFirstLoaded) {
+      this.isFirstLoaded = false
       this.timespan = this.isTranscoded ? await ffmpeg.getDuration(this.source) : this.duration
-      this.onceloaded()
+      this.onFirstLoaded()
     }
   },
 

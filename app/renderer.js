@@ -93,6 +93,7 @@ openFilesBtn.onclick = async function() {
 
 playBtn.onclick = play = function() {
   if (video.paused) {
+    if (video.ended) video.seek(0)
     video.play()
     playBtn.className = 'pause'
   } else {
@@ -175,18 +176,26 @@ document.onkeyup = function(e) {
 
 video.onloadstart = function() {
   loading(true)
+  disableBtns(true)
+  if (video.isFirstLoaded) {
+    resetControls()
+  }
 }
 
-video.onceloaded = function() {
+video.onFirstLoaded = function() {
+  openFileBtn.style.opacity = 0
+  segment.style.left = 0
+  segment.style.right = '100%'
+  playBtn.className = 'play'
   duration.innerHTML = cutEndTime.value = util.formatDuration(video.getDuration())
 }
 
 video.oncanplay = function() {
   loading(false)
   disableBtns(false)
-  openFileBtn.style.opacity = 0
-  segment.style.left = 0
-  segment.style.right = '100%'
+  if (playBtn.className == 'pause') {
+    video.play()
+  }
 }
 
 video.ontimeupdate = function() {
@@ -202,9 +211,9 @@ video.onended = function() {
 video.onerror = function(e) {
   if (video.isTranscoded) {
     alert('Unsupported video format')
-    resetControls()
     loading(false)
     disableBtns(true)
+    resetControls()
   } else {
     video.transcode()
   }
