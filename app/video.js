@@ -58,13 +58,18 @@ module.exports = {
   },
 
   createServer() {
-    if (this.server && this.server.listening) {
-      return
-    }
+    if (this.server && this.server.listening) return
+
     this.server = http.createServer((request, response) => {
       const params = util.parseQuery(request.url)
-      const process = ffmpeg.fastCodec(params.source, params.startTime)
-      process.stdout.pipe(response)
+      const ffProc = ffmpeg.fastCodec(params.source, params.startTime)
+      ffProc.stdout.pipe(response)
+
+      request.on('close', () => {
+        ffProc.stdout.destroy()
+        ffProc.stderr.destroy()
+        ffProc.kill()
+      })
     }).listen(4725)
   }
 
