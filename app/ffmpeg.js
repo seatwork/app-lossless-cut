@@ -14,7 +14,7 @@ const ffmpegPath = path.join(__dirname, 'assets/ffmpeg.exe')
 function ffmpegCommand(args, options, callback) {
   loading(true)
   const process = execFile(ffmpegPath, args, options, (error, stdout, stderr) => {
-    loading(false)
+    if (!(stderr instanceof Buffer)) loading(false)
     if (callback) callback(stderr)
     else if (error) {
       error = error.toString().trim()
@@ -29,9 +29,12 @@ function ffmpegCommand(args, options, callback) {
     if (index > -1) {
       const duration = args[index + 1]
       const match = / time\=(\d{2}:\d{2}:\d{2}\.\d{2,3}) /.exec(stderr)
-      const time = match ? util.parseDuration(match[1]) : 0
-      const progress = Math.round((time / duration) * 100)
-      loading(progress)
+
+      if (match) {
+        const time = util.parseDuration(match[1])
+        const progress = Math.round((time / duration) * 100)
+        loading(progress)
+      }
     }
   })
   return process

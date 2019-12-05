@@ -24,12 +24,12 @@ module.exports = {
   },
 
   loading(progress) {
-    if (progress) {
-      loading.style.display = 'block'
-      pointer.innerHTML = Number.isInteger(progress) ? progress : ''
-    } else {
+    if (progress === false || progress === 100) {
       loading.style.display = 'none'
       pointer.innerHTML = ''
+    } else {
+      loading.style.display = 'block'
+      pointer.innerHTML = Number.isInteger(progress) ? progress : ''
     }
   }
 }
