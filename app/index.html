@@ -35,7 +35,8 @@
       <div class="features">
         <button class="capture" title="Capture Image" disabled></button>
         <button class="extract" title="Extract Audio" disabled></button>
-        <button class="cut" title="Cut Video" disabled></button>
+        <button class="cut" title="Lossless Cut" disabled></button>
+        <button class="convert" title="Cut to MP4"></button>
         <button class="open-files" title="Merge Videos"></button>
         <button class="help" title="Help"></button>
       </div>
@@ -49,7 +50,10 @@
       </div>
     </div>
 
-    <div class="loading"></div>
+    <div class="loading">
+      <div class="loader"></div>
+      <div class="pointer"></div>
+    </div>
     <div class="message"><div></div></div>
     <script src="./renderer.js"></script>
   </body>

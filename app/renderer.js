@@ -31,6 +31,7 @@ const cutEndBtn = $('.cut-end')
 const captureBtn = $('.capture')
 const extractBtn = $('.extract')
 const cutBtn = $('.cut')
+const convertBtn = $('.convert')
 const openFilesBtn = $('.open-files')
 const merger = $('.merger')
 const fileList = $('.merger ol')
@@ -106,12 +107,16 @@ cutBtn.onclick = function() {
   ffmpeg.cutVideo(video.source, cutStartTime.value, cutEndTime.value)
 }
 
-captureBtn.onclick = function() {
-  ffmpeg.captureImage(video.source, video.getCurrentTime())
+convertBtn.onclick = function() {
+  ffmpeg.convertVideo(video.source, cutStartTime.value, cutEndTime.value)
 }
 
 extractBtn.onclick = function() {
-  ffmpeg.extractAudio(video.source)
+  ffmpeg.extractAudio(video.source, cutStartTime.value, cutEndTime.value)
+}
+
+captureBtn.onclick = function() {
+  ffmpeg.captureImage(video.source, video.getCurrentTime())
 }
 
 mergeBtn.onclick = function() {
@@ -253,6 +258,7 @@ function disableBtns(bool) {
   captureBtn.disabled = bool
   extractBtn.disabled = bool
   cutBtn.disabled = bool
+  convertBtn.disabled = bool
 }
 
 function $(selector) {

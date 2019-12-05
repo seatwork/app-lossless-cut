@@ -8,6 +8,7 @@
 
 const message = document.querySelector('.message')
 const loading = document.querySelector('.loading')
+const pointer = loading.querySelector('.pointer')
 
 module.exports = {
   alert(text) {
@@ -19,10 +20,16 @@ module.exports = {
     if (message.timer) clearTimeout(message.timer)
     message.timer = setTimeout(function() {
       content.classList.remove('visible')
-    }, 5000)
+    }, 3000)
   },
 
-  loading(bool) {
-    loading.style.display = bool ? 'block' : 'none'
+  loading(progress) {
+    if (progress) {
+      loading.style.display = 'block'
+      pointer.innerHTML = Number.isInteger(progress) ? progress : ''
+    } else {
+      loading.style.display = 'none'
+      pointer.innerHTML = ''
+    }
   }
 }
