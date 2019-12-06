@@ -108,7 +108,7 @@ convertBtn.onclick = function() {
 }
 
 extractBtn.onclick = function() {
-  ffmpeg.extractAudio(video.source, cutStartTime.value, cutEndTime.value)
+  ffmpeg.extractAudio(video, cutStartTime.value, cutEndTime.value)
 }
 
 captureBtn.onclick = function() {

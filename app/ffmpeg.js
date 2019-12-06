@@ -86,14 +86,23 @@ module.exports = {
     ])
   },
 
-  extractAudio(videoPath, startTime, endTime) {
-    const outputFile = formatOutputFile(videoPath, startTime, endTime, '.mp3')
+  extractAudio(video, startTime, endTime) {
     const segment = parseSegment(startTime, endTime)
     if (!segment) return
 
+    const audio = video.metadata.Audio
+    if (!audio) {
+      alert('This media does not contain any audio')
+      return
+    }
+
+    const bitrate = audio.BitRate ? Number(audio.BitRate) : 0
+    const args = bitrate ? (bitrate > 320000 ? ['-b:a', '320k'] : ['-b:a', bitrate]) : ['-q:a', 0]
+    const outputFile = formatOutputFile(video.source, startTime, endTime, '.mp3')
+
     return ffmpegCommand([
-      '-ss', segment.start, '-t', segment.duration, '-i', videoPath,
-      '-q:a', 0, '-vn', '-y', outputFile
+      '-ss', segment.start, '-t', segment.duration, '-i', video.source,
+      ...args, '-vn', '-y', outputFile
     ])
   },
 
