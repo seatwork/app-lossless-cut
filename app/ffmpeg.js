@@ -15,8 +15,10 @@ const mediainfo = path.join(__dirname, 'assets/mediainfo.exe')
 function ffmpegCommand(args, options) {
   loading(true)
   const process = execFile(ffmpeg, args, options, (error, stdout, stderr) => {
-    if (!(stderr instanceof Buffer)) loading(false)
-    else if (error) {
+    if (stderr instanceof Buffer) return
+
+    loading(false)
+    if (error) {
       error = error.toString().trim()
       error = error.substring(error.lastIndexOf('\n') + 1)
       error = error.substring(error.lastIndexOf(':') + 1)
