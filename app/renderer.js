@@ -66,18 +66,14 @@ openFileBtn.ondrop = function(e) {
 }
 
 openFileBtn.onclick = async function() {
-  const { canceled, filePaths } = await dialog.showOpenDialog({ properties: ['openFile'] })
+  const { canceled, filePaths } = await openFileDialog()
   if (!canceled && filePaths && filePaths.length == 1) {
     video.setSource(filePaths[0])
   }
 }
 
 openFilesBtn.onclick = async function() {
-  const { canceled, filePaths } = await dialog.showOpenDialog({
-    title: 'Please select files to be merged',
-    message: 'Please select files to be merged. The files need to be of the exact same format and codecs',
-    properties: ['openFile', 'multiSelections'],
-  })
+  const { canceled, filePaths } = await openFileDialog(true)
 
   if (!canceled && filePaths && filePaths.length > 1) {
     merger.style.display = 'flex'
@@ -228,6 +224,20 @@ video.onerror = function(e) {
 /* --------------------------------------------------------
  * Private Methods
  * ----------------------------------------------------- */
+
+function openFileDialog(multiple = false) {
+  return dialog.showOpenDialog({
+    properties: ['openFile', multiple ? 'multiSelections' : false],
+    filters: [
+      { name: 'Media Files', extensions: [
+        '3gp', 'asf', 'avi', 'dat', 'flv',
+        'mkv', 'mov', 'mp4', 'mpg', 'mpeg', 'ogg', 'rm', 'rmvb', 'vob', 'wmv',
+        'aac', 'ape', 'alac', 'flac', 'mp3', 'wav'
+      ]},
+      { name: 'All Files', extensions: ['*'] }
+    ]
+  })
+}
 
 function setSegment() {
   segment.style.left = (util.parseDuration(cutStartTime.value) / video.getDuration()) * 100 + '%'
