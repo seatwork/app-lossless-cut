@@ -64,6 +64,10 @@ module.exports = {
         ffProc.kill()
       })
     }).listen(4725)
+
+    this.server.on('error', err => {
+      alert(err.message)
+    })
   }
 
 }
