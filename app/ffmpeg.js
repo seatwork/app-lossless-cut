@@ -9,13 +9,13 @@
 const fs = require('fs')
 const stringToStream = require('string-to-stream')
 const { execFile } = require('child_process')
-const ffmpegPath = path.join(__dirname, 'assets/ffmpeg.exe')
+const ffmpeg = path.join(__dirname, 'assets/ffmpeg.exe')
+const mediainfo = path.join(__dirname, 'assets/mediainfo.exe')
 
-function ffmpegCommand(args, options, callback) {
+function ffmpegCommand(args, options) {
   loading(true)
-  const process = execFile(ffmpegPath, args, options, (error, stdout, stderr) => {
+  const process = execFile(ffmpeg, args, options, (error, stdout, stderr) => {
     if (!(stderr instanceof Buffer)) loading(false)
-    if (callback) callback(stderr)
     else if (error) {
       error = error.toString().trim()
       error = error.substring(error.lastIndexOf('\n') + 1)
@@ -126,14 +126,23 @@ module.exports = {
       '-f', 'mp4', '-frag_duration', 1000000, 'pipe:1',
     ], {
       encoding: 'buffer', maxBuffer: file.size,
-    }, function() {})
+    })
   },
 
-  getDuration(videoPath) {
+  getMediaInfo(videoPath) {
     return new Promise(resolve => {
-      ffmpegCommand(['-i', videoPath, '-'], function(stderr) {
-        const match = /Duration\: ([0-9\:\.]+),/.exec(stderr)
-        resolve(match ? util.parseDuration(match[1]) : 0)
+      execFile(mediainfo, [videoPath, '--Output=JSON'], (error, stdout) => {
+        if (error) {
+          alert('Get media information failed')
+          return
+        }
+        if (stdout.trim()) {
+          const mediaTrack = JSON.parse(stdout).media.track
+          const mediaInfo = {}
+          // @type: General, Video, Audio, ...
+          mediaTrack.forEach(track => mediaInfo[track['@type']] = track)
+          resolve(mediaInfo)
+        }
       })
     })
   }

@@ -14,14 +14,13 @@ module.exports = {
   setSource(source) {
     this.source = source
     this.src = source
-    this.isFirstLoaded = true
     this.isTranscoded = false
-    this.timespan = undefined
+    this.metadata = undefined
     this.startTime = 0
   },
 
   getDuration() {
-    return this.timespan
+    return this.metadata ? this.metadata.General.Duration : undefined
   },
 
   getCurrentTime() {
@@ -29,10 +28,12 @@ module.exports = {
   },
 
   async onloadedmetadata() {
-    if (this.isFirstLoaded) {
-      this.isFirstLoaded = false
-      this.timespan = this.isTranscoded ? await ffmpeg.getDuration(this.source) : this.duration
-      this.onFirstLoaded()
+    if (!this.metadata) {
+      this.metadata = await ffmpeg.getMediaInfo(this.source)
+      if (!this.isTranscoded) {
+        this.metadata.General.Duration = this.duration
+      }
+      this.onmetadataloaded()
     }
   },
 
@@ -47,7 +48,7 @@ module.exports = {
   seek(timestamp) {
     if (timestamp === undefined) return
     if (timestamp < 0) timestamp = 0
-    if (timestamp > this.timespan) timestamp = this.timespan
+    if (timestamp > this.metadata.General.Duration) timestamp = this.metadata.General.Duration
 
     if (this.isTranscoded) {
       this.src = host + '?source=' + this.source + '&startTime=' + timestamp

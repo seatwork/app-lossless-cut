@@ -178,12 +178,12 @@ document.onkeyup = function(e) {
 video.onloadstart = function() {
   loading(true)
   disableBtns(true)
-  if (video.isFirstLoaded) {
+  if (video.getDuration() == undefined) {
     resetControls()
   }
 }
 
-video.onFirstLoaded = function() {
+video.onmetadataloaded = function() {
   openFileBtn.style.opacity = 0
   segment.style.left = 0
   segment.style.right = '100%'
