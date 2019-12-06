@@ -183,12 +183,15 @@ video.onloadstart = function() {
   }
 }
 
-video.onmetadataloaded = function() {
-  openFileBtn.style.opacity = 0
-  segment.style.left = 0
-  segment.style.right = '100%'
-  playBtn.className = 'play'
-  duration.innerHTML = cutEndTime.value = util.formatDuration(video.getDuration())
+video.onloadedmetadata = function() {
+  if (!video.isLoaded) {
+    video.isLoaded = true
+    openFileBtn.style.opacity = 0
+    segment.style.left = 0
+    segment.style.right = '100%'
+    playBtn.className = 'play'
+    duration.innerHTML = cutEndTime.value = util.formatDuration(video.getDuration())
+  }
 }
 
 video.oncanplay = function() {

@@ -11,36 +11,28 @@ const ffmpeg = require('./ffmpeg')
 const host = 'http://127.0.0.1:4725'
 
 module.exports = {
-  setSource(source) {
+
+  async setSource(source) {
+    this.metadata = await ffmpeg.getMediaInfo(source)
     this.source = source
     this.src = source
+    this.isLoaded = false
     this.isTranscoded = false
-    this.metadata = undefined
     this.startTime = 0
   },
 
   getDuration() {
-    return this.metadata ? this.metadata.General.Duration : undefined
+    return this.metadata.General.Duration
   },
 
   getCurrentTime() {
     return this.currentTime + this.startTime
   },
 
-  async onloadedmetadata() {
-    if (!this.metadata) {
-      this.metadata = await ffmpeg.getMediaInfo(this.source)
-      if (!this.isTranscoded) {
-        this.metadata.General.Duration = this.duration
-      }
-      this.onmetadataloaded()
-    }
-  },
-
   transcode() {
     if (!this.isTranscoded) {
       this.isTranscoded = true
-      this.src = host + '?source=' + this.source
+      this.seek(0)
       this.createServer()
     }
   },
@@ -51,7 +43,7 @@ module.exports = {
     if (timestamp > this.metadata.General.Duration) timestamp = this.metadata.General.Duration
 
     if (this.isTranscoded) {
-      this.src = host + '?source=' + this.source + '&startTime=' + timestamp
+      this.src = host + '?source=' + this.source + '&fileSize=' + this.metadata.General.FileSize + '&startTime=' + timestamp
       this.startTime = timestamp
     } else {
       this.currentTime = timestamp
@@ -63,7 +55,7 @@ module.exports = {
 
     this.server = http.createServer((request, response) => {
       const params = util.parseQuery(request.url)
-      const ffProc = ffmpeg.fastCodec(params.source, params.startTime)
+      const ffProc = ffmpeg.fastCodec(params.source, params.fileSize, params.startTime)
       ffProc.stdout.pipe(response)
 
       request.on('close', () => {

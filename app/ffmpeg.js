@@ -6,9 +6,8 @@
  * --------------------------------------------------------
  */
 
-const fs = require('fs')
-const stringToStream = require('string-to-stream')
 const { execFile } = require('child_process')
+const stringToStream = require('string-to-stream')
 const ffmpeg = path.join(__dirname, 'assets/ffmpeg.exe')
 const mediainfo = path.join(__dirname, 'assets/mediainfo.exe')
 
@@ -118,16 +117,13 @@ module.exports = {
     return process
   },
 
-  fastCodec(videoPath, startTime) {
-    startTime = startTime || 0
-    const file = fs.statSync(videoPath)
-
+  fastCodec(videoPath, fileSize, startTime) {
     // -frag_duration: Create fragments that are duration microseconds long.
     return ffmpegCommand([
       '-ss', startTime, '-i', videoPath, '-preset:v', 'ultrafast',
       '-f', 'mp4', '-frag_duration', 1000000, 'pipe:1',
     ], {
-      encoding: 'buffer', maxBuffer: file.size,
+      encoding: 'buffer', maxBuffer: Number(fileSize),
     })
   },
 
