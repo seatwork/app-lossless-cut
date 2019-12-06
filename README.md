@@ -58,7 +58,7 @@ npm run package
 
 ## 遇过的坑
 
-- 打包成 asar 档案后，fluent-ffmpeg 无法运行档案中的 exe 命令（即 ffmpeg.exe），查遍相关资料发现，fluent-ffmpeg 中启动子进程使用的 spawn 方法无法读取 asar 档案中的二进制文件，但 execFile 方式可以，于是弃用 fluent-ffmpeg 模块，自己改写 ffmpeg.js。
+- 打包成 asar 档案后，fluent-ffmpeg 无法运行档案中的 exe 命令（即 ffmpeg.exe），查遍相关资料发现，fluent-ffmpeg 中启动子进程使用的 `spawn` 方法无法读取 asar 档案中的二进制文件，但 `execFile` 方式可以，于是弃用 fluent-ffmpeg 模块，自己改写 ffmpeg.js。
 
 - 在 ffmpeg 子进程通过 pipe 管道输出视频流的情况下，必须设置 `encoding: 'buffer'` 选项，且必须指定足够大的 `maxBuffer` 数值（通常是视频文件大小），否则客户端无法接收到数据。
 
