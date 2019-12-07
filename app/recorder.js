@@ -15,7 +15,7 @@ module.exports = class {
     this.stopBtn = $('.recorder button.stop')
     this.started = false
 
-    this.el.onclick = () => this.hide()
+    this.el.onclick = e => this.onmaskclick(e)
     this.startBtn.onclick = () => {
       this.switch()
       this.onstart && this.onstart()
@@ -35,13 +35,17 @@ module.exports = class {
       this.started = false
       this.startBtn.style.display = 'block'
       this.stopBtn.style.display = 'none'
-      this.el.onclick = () => this.hide()
+      this.el.onclick = e => this.onmaskclick(e)
     } else {
       this.started = true
       this.startBtn.style.display = 'none'
       this.stopBtn.style.display = 'block'
       this.el.onclick = null
     }
+  }
+
+  onmaskclick(e) {
+    if (e.currentTarget === e.target) this.hide()
   }
 
   show() {
