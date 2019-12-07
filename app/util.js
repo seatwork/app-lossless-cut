@@ -11,6 +11,10 @@ function padStart(num, length) {
 }
 
 module.exports = {
+  isNumber(string) {
+    return Number.isFinite(parseFloat(string))
+  },
+
   parseQuery(queryString) {
     const index = queryString.indexOf('?')
     queryString = index > -1 ? queryString.substring(index+1) : queryString
