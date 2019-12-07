@@ -18,11 +18,11 @@ module.exports = class {
     this.el.onclick = e => this.onmaskclick(e)
     this.startBtn.onclick = () => {
       this.switch()
-      this.onstart && this.onstart()
+      this.onstart()
     }
     this.stopBtn.onclick = () => {
       this.switch()
-      this.onstop && this.onstop()
+      this.onstop()
     }
   }
 

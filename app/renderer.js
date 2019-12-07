@@ -187,11 +187,12 @@ recorder.onstart = function() {
   const outputPath = getGlobal('path').desktop
   recorder.process = ffmpeg.recordVideo(outputPath)
   recorder.process.ontimeupdate = res => recorder.setDuration(res)
-  electron.ipcRenderer.send('put-in-tray')
+  electron.ipcRenderer.send('create-tray')
 }
 
 recorder.onstop = function() {
   recorder.process.stdin.write('q')
+  electron.ipcRenderer.send('remove-tray')
 }
 
 /* --------------------------------------------------------
@@ -308,7 +309,7 @@ function showMetadataOnTitle() {
   if (frameRate) metadata.push(parseFloat(frameRate.toFixed(2)) + 'fps')
   if (bitRate)  metadata.push(Math.round(bitRate / 1000) + 'kbps')
   if (samplingRate)  metadata.push(parseFloat((samplingRate / 1000).toFixed(1)) + 'kHz')
-  electron.ipcRenderer.send('title-change', metadata.join(', '))
+  electron.ipcRenderer.send('change-title', metadata.join(', '))
 }
 
 function $(selector) {

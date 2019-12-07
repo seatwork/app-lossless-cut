@@ -13,7 +13,7 @@ const appIcon = path.join(__dirname, 'assets/logo.ico')
 const emptyIcon = electron.nativeImage.createEmpty()
 const app = electron.app
 
-let mainWindow
+let mainWindow, tray
 
 global.path = {
   desktop: app.getPath('desktop')
@@ -42,6 +42,13 @@ function createWindow() {
 
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()
+
+  // Hide window instead of minimize if tray exists
+  mainWindow.on('minimize', function() {
+    if (tray && !tray.isDestroyed()) {
+      mainWindow.hide()
+    }
+  })
 
   // Emitted when the window is closed.
   mainWindow.on('closed', function() {
@@ -91,20 +98,16 @@ if (!gotTheLock) { app.quit() } else {
  * IPC Events
  * ----------------------------------------------------- */
 
-electron.ipcMain.on('title-change', (event, arg) => {
+electron.ipcMain.on('change-title', (event, arg) => {
   mainWindow.setTitle(app.name + '  |  ' + arg)
 })
 
-// Create System Tray
-electron.ipcMain.on('put-in-tray', function createTray() {
-  let tray = new electron.Tray(appIcon)
-  mainWindow.hide()
-
+electron.ipcMain.on('create-tray', () => {
+  tray = new electron.Tray(appIcon)
+  tray.setToolTip('Recording...')
   tray.count = 0
   tray.timer = setInterval(() => {
     tray.count++
-    tray.setToolTip('Recording...')
-
     if (tray.count % 2 === 0) {
       tray.setImage(appIcon)
     } else {
@@ -112,9 +115,13 @@ electron.ipcMain.on('put-in-tray', function createTray() {
     }
   }, 500)
 
+  mainWindow.hide()
   tray.on('click', () => {
-    clearInterval(tray.timer)
-    tray.destroy()
     mainWindow.show()
   })
+})
+
+electron.ipcMain.on('remove-tray', () => {
+  clearInterval(tray.timer)
+  tray.destroy()
 })
