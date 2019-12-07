@@ -291,7 +291,7 @@ button.open-files {
 }
 
 button.record {
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 1024 1024' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M673.262 713.516H350.88a40.324 40.324 0 0 1-40.325-40.324V350.738a40.324 40.324 0 0 1 40.325-40.325h322.454a40.324 40.324 0 0 1 40.29 40.325v322.454a40.324 40.324 0 0 1-40.36 40.324z' fill='%23333'/%3E%3Cpath d='M512 78.777A433.223 433.223 0 1 1 78.777 512 433.682 433.682 0 0 1 512 78.777M512 0a512 512 0 1 0 512 512A512 512 0 0 0 512 0z' fill='%23333'/%3E%3C/svg%3E")
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 1024 1024' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M512 896a384 384 0 1 0 0-768 384 384 0 0 0 0 768zm0 128A512 512 0 1 1 512 0a512 512 0 0 1 0 1024zM384 320h256a64 64 0 0 1 64 64v256a64 64 0 0 1-64 64H384a64 64 0 0 1-64-64V384a64 64 0 0 1 64-64z' fill='%23333'/%3E%3C/svg%3E")
 }
 
 button.help {
