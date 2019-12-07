@@ -6,31 +6,39 @@
  * --------------------------------------------------------
  */
 
-// Modules to control application life and create native browser window
 const electron = require('electron')
 const path = require('path')
-const { app, Menu, BrowserWindow } = electron
+const indexPage = path.join(__dirname, 'index.html')
+const appIcon = path.join(__dirname, 'assets/logo.ico')
+const emptyIcon = electron.nativeImage.createEmpty()
+const app = electron.app
 
-// Keep a global reference of the window object, if you don't, the window will
-// be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
+
+global.path = {
+  desktop: app.getPath('desktop')
+}
+
+/* --------------------------------------------------------
+ * Create Main Window
+ * ----------------------------------------------------- */
 
 function createWindow() {
   // Hide the menu of application
-  Menu.setApplicationMenu(null)
+  electron.Menu.setApplicationMenu(null)
 
   // Create the browser window.
-  mainWindow = new BrowserWindow({
+  mainWindow = new electron.BrowserWindow({
     width: 780, // Make sure the aspect ratio of video is 16:9
     height: 600,
-    icon: path.join(__dirname, 'assets/logo.ico'),
+    icon: appIcon,
     webPreferences: {
       nodeIntegration: true, // Make sure integrate node in renderer.js
     }
   })
 
   // and load the index.html of the app.
-  mainWindow.loadFile(path.join(__dirname, 'index.html'))
+  mainWindow.loadFile(indexPage)
 
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()
@@ -43,6 +51,10 @@ function createWindow() {
     mainWindow = null
   })
 }
+
+/* --------------------------------------------------------
+ * Init Application Instance
+ * ----------------------------------------------------- */
 
 const gotTheLock = app.requestSingleInstanceLock()
 if (!gotTheLock) { app.quit() } else {
@@ -74,3 +86,31 @@ if (!gotTheLock) { app.quit() } else {
   })
 
 }
+
+/* --------------------------------------------------------
+ * IPC Events
+ * ----------------------------------------------------- */
+
+// Create System Tray
+electron.ipcMain.on('put-in-tray', function createTray() {
+  let tray = new electron.Tray(appIcon)
+  mainWindow.hide()
+
+  tray.count = 0
+  tray.timer = setInterval(() => {
+    tray.count++
+    tray.setToolTip('Recording...')
+
+    if (tray.count % 2 === 0) {
+      tray.setImage(appIcon)
+    } else {
+      tray.setImage(emptyIcon)
+    }
+  }, 500)
+
+  tray.on('click', () => {
+    clearInterval(tray.timer)
+    tray.destroy()
+    mainWindow.show()
+  })
+})
