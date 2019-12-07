@@ -11,6 +11,7 @@ const loading = document.querySelector('.loading')
 const pointer = loading.querySelector('.pointer')
 
 module.exports = {
+
   alert(text) {
     const content = message.querySelector('div')
     content.innerHTML = text
@@ -32,4 +33,5 @@ module.exports = {
       pointer.innerHTML = Number.isInteger(progress) ? progress : ''
     }
   }
+
 }
