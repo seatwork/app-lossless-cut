@@ -8,13 +8,11 @@
 
 const electron = require('electron')
 const path = require('path')
-const indexPage = path.join(__dirname, 'index.html')
 const appIcon = path.join(__dirname, 'assets/logo.ico')
 const emptyIcon = electron.nativeImage.createEmpty()
 const app = electron.app
 
 let mainWindow, tray
-
 global.path = {
   desktop: app.getPath('desktop')
 }
@@ -34,14 +32,15 @@ function createWindow() {
     icon: appIcon,
     webPreferences: {
       nodeIntegration: true, // Make sure integrate node in renderer.js
+      preload: path.join(__dirname, 'preload.js')
     }
   })
 
   // and load the index.html of the app.
-  mainWindow.loadFile(indexPage)
+  mainWindow.loadFile(path.join(__dirname, 'index.html'))
 
   // Open the DevTools.
-  // mainWindow.webContents.openDevTools()
+  mainWindow.webContents.openDevTools()
 
   // Hide window instead of minimize if tray exists
   mainWindow.on('minimize', function() {

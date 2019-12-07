@@ -9,13 +9,21 @@
 module.exports = class {
 
   constructor() {
-    this.el = $('.recorder')
-    this.duration = $('.recorder>div>div')
-    this.startBtn = $('.recorder button.start')
-    this.stopBtn = $('.recorder button.stop')
-    this.started = false
+    this.container = $(`
+      <div class="recorder"><div>
+        <div class="duration">00:00:00.00</div>
+        <button class="start">Start</button>
+        <button class="stop">Stop</button>
+      </div></div>
+    `)
 
-    this.el.onclick = e => this.onmaskclick(e)
+    this.duration = this.container.$('.duration')
+    this.startBtn = this.container.$('button.start')
+    this.stopBtn = this.container.$('button.stop')
+    this.started = false
+    document.body.appendChild(this.container)
+
+    this.container.onclick = e => this.onmaskclick(e)
     this.startBtn.onclick = () => {
       this.switch()
       this.onstart()
@@ -35,12 +43,12 @@ module.exports = class {
       this.started = false
       this.startBtn.style.display = 'block'
       this.stopBtn.style.display = 'none'
-      this.el.onclick = e => this.onmaskclick(e)
+      this.container.onclick = e => this.onmaskclick(e)
     } else {
       this.started = true
       this.startBtn.style.display = 'none'
       this.stopBtn.style.display = 'block'
-      this.el.onclick = null
+      this.container.onclick = null
     }
   }
 
@@ -49,11 +57,11 @@ module.exports = class {
   }
 
   show() {
-    this.el.classList.add('visible')
+    this.container.classList.add('visible')
   }
 
   hide() {
-    this.el.classList.remove('visible')
+    this.container.classList.remove('visible')
   }
 
 }

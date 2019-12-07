@@ -8,10 +8,9 @@
 
 const electron = require('electron')
 const path = require('path')
-const util = require('./util')
 const ffmpeg = require('./ffmpeg')
+const Merge = require('./merge')
 const Recorder = require('./recorder')
-const { alert, loading } = require('./component')
 const { dialog, getGlobal } = electron.remote
 
 const openFileBtn = $('#open-file')
@@ -34,16 +33,16 @@ const extractBtn = $('.extract')
 const cutBtn = $('.cut')
 const convertBtn = $('.convert')
 const openFilesBtn = $('.open-files')
-const merger = $('.merger')
-const fileList = $('.merger ol')
-const mergeBtn = $('.merge')
-const cancelBtn = $('.cancel')
 const recordBtn = $('.record')
 
 const video = $('video')
 Object.assign(video, require('./video'))
 
 const recorder = new Recorder()
+const merge = new Merge()
+merge.onmerge = function() {
+  ffmpeg.mergeVideos(video.sources)
+}
 
 /* --------------------------------------------------------
  * Renderer Events
@@ -80,15 +79,8 @@ openFilesBtn.onclick = async function() {
   const { canceled, filePaths } = await openFileDialog(true)
 
   if (!canceled && filePaths && filePaths.length > 1) {
-    merger.style.display = 'flex'
-    fileList.innerHTML = ''
     video.sources = filePaths
-
-    filePaths.forEach(filePath => {
-      let item = document.createElement('li')
-      item.innerHTML = path.basename(filePath)
-      fileList.appendChild(item)
-    })
+    merge.setFileList(filePaths)
   }
 }
 
@@ -119,16 +111,8 @@ captureBtn.onclick = function() {
   ffmpeg.captureImage(video.source, video.getCurrentTime())
 }
 
-mergeBtn.onclick = function() {
-  ffmpeg.mergeVideos(video.sources)
-}
-
 recordBtn.onclick = function() {
   recorder.show()
-}
-
-cancelBtn.onclick = function() {
-  merger.style.display = 'none'
 }
 
 timeline.onclick = function(e) {
@@ -137,21 +121,21 @@ timeline.onclick = function(e) {
 }
 
 cutStartBtn.onclick = function() {
-  cutStartTime.value = util.formatDuration(video.getCurrentTime())
+  cutStartTime.value = formatDuration(video.getCurrentTime())
   setSegment()
 }
 
 cutEndBtn.onclick = function() {
-  cutEndTime.value = util.formatDuration(video.getCurrentTime())
+  cutEndTime.value = formatDuration(video.getCurrentTime())
   setSegment()
 }
 
 segmentStartBtn.onclick = function() {
-  video.seek(util.parseDuration(cutStartTime.value))
+  video.seek(parseDuration(cutStartTime.value))
 }
 
 segmentEndBtn.onclick = function() {
-  video.seek(util.parseDuration(cutEndTime.value))
+  video.seek(parseDuration(cutEndTime.value))
 }
 
 videoStartBtn.onclick = function() {
@@ -163,7 +147,7 @@ videoEndBtn.onclick = function() {
 }
 
 cutStartTime.oninput = cutEndTime.oninput = function onTimeChange() {
-  video.seek(util.parseDuration(this.value))
+  video.seek(parseDuration(this.value))
   setSegment()
 }
 
@@ -214,7 +198,7 @@ video.onloadedmetadata = function() {
     segment.style.left = 0
     segment.style.right = '100%'
     playBtn.className = 'play'
-    duration.innerHTML = cutEndTime.value = util.formatDuration(video.getDuration())
+    duration.innerHTML = cutEndTime.value = formatDuration(video.getDuration())
     showMetadataOnTitle()
   }
 }
@@ -228,7 +212,7 @@ video.oncanplay = function() {
 }
 
 video.ontimeupdate = function() {
-  currentTime.innerHTML = util.formatDuration(video.getCurrentTime())
+  currentTime.innerHTML = formatDuration(video.getCurrentTime())
   progress.style.left = (video.getCurrentTime() / video.getDuration()) * 100 + '%'
 }
 
@@ -268,8 +252,8 @@ function openFileDialog(multiple = false) {
 }
 
 function setSegment() {
-  segment.style.left = (util.parseDuration(cutStartTime.value) / video.getDuration()) * 100 + '%'
-  segment.style.right = (100 - (util.parseDuration(cutEndTime.value) / video.getDuration()) * 100) + '%'
+  segment.style.left = (parseDuration(cutStartTime.value) / video.getDuration()) * 100 + '%'
+  segment.style.right = (100 - (parseDuration(cutEndTime.value) / video.getDuration()) * 100) + '%'
 }
 
 function resetControls() {
@@ -310,8 +294,4 @@ function showMetadataOnTitle() {
   if (bitRate)  metadata.push(Math.round(bitRate / 1000) + 'kbps')
   if (samplingRate)  metadata.push(parseFloat((samplingRate / 1000).toFixed(1)) + 'kHz')
   electron.ipcRenderer.send('change-title', metadata.join(', '))
-}
-
-function $(selector) {
-  return document.querySelector(selector)
 }

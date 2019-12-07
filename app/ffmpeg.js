@@ -33,7 +33,7 @@ function ffmpegCommand(args, options) {
       const index = args.indexOf('-t')
       if (index > -1) {
         const duration = args[index + 1]
-        const progress = Math.round((util.parseDuration(match[1]) / duration) * 100)
+        const progress = Math.round((parseDuration(match[1]) / duration) * 100)
         loading(progress)
       }
     }
@@ -42,8 +42,8 @@ function ffmpegCommand(args, options) {
 }
 
 function parseSegment(startTime, endTime) {
-  const start = util.parseDuration(startTime)
-  const end = util.parseDuration(endTime)
+  const start = parseDuration(startTime)
+  const end = parseDuration(endTime)
   if (start >= end) {
     alert('Start time cannot be later than end time')
     return false
@@ -101,7 +101,7 @@ module.exports = {
   },
 
   captureImage(videoPath, timestamp) {
-    const outputFile = formatOutputFile(videoPath, util.formatDuration(timestamp), 1, '.jpg')
+    const outputFile = formatOutputFile(videoPath, formatDuration(timestamp), 1, '.jpg')
     return ffmpegCommand([
       '-ss', timestamp, '-i', videoPath, '-vframes', 1,
       '-f', 'mjpeg', '-q:v', 2, '-y', outputFile

@@ -27,7 +27,7 @@ module.exports = {
     while (value && i < key.length) {
       value = value[key[i]]; i++
     }
-    return util.isNumber(value) ? Number(value) : value
+    return isNumber(value) ? Number(value) : value
   },
 
   getDuration() {
@@ -63,7 +63,7 @@ module.exports = {
     if (this.server && this.server.listening) return
 
     this.server = http.createServer((request, response) => {
-      const params = util.parseQuery(request.url)
+      const params = parseQuery(request.url)
       const ffProc = ffmpeg.fastCodec(params.source, params.fileSize, params.startTime)
       ffProc.stdout.pipe(response)
 
