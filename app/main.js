@@ -91,6 +91,10 @@ if (!gotTheLock) { app.quit() } else {
  * IPC Events
  * ----------------------------------------------------- */
 
+electron.ipcMain.on('title-change', (event, arg) => {
+  mainWindow.setTitle(app.name + '  |  ' + arg)
+})
+
 // Create System Tray
 electron.ipcMain.on('put-in-tray', function createTray() {
   let tray = new electron.Tray(appIcon)

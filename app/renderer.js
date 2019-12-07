@@ -214,6 +214,7 @@ video.onloadedmetadata = function() {
     segment.style.right = '100%'
     playBtn.className = 'play'
     duration.innerHTML = cutEndTime.value = util.formatDuration(video.getDuration())
+    showMetadataOnTitle()
   }
 }
 
@@ -295,6 +296,19 @@ function disableBtns(bool) {
   extractBtn.disabled = bool
   cutBtn.disabled = bool
   convertBtn.disabled = bool
+}
+
+function showMetadataOnTitle() {
+  let format = video.getMetadata('General.Format') || ''
+  let frameRate = video.getMetadata('General.FrameRate')
+  let bitRate = video.getMetadata('General.OverallBitRate')
+  let samplingRate = video.getMetadata('Audio.SamplingRate')
+
+  const metadata = [ format ]
+  if (frameRate) metadata.push(parseFloat(frameRate.toFixed(2)) + 'fps')
+  if (bitRate)  metadata.push(Math.round(bitRate / 1000) + 'kbps')
+  if (samplingRate)  metadata.push(parseFloat((samplingRate / 1000).toFixed(1)) + 'kHz')
+  electron.ipcRenderer.send('title-change', metadata.join(', '))
 }
 
 function $(selector) {

@@ -19,10 +19,6 @@ module.exports = {
     this.isLoaded = false
     this.isTranscoded = false
     this.startTime = 0
-    console.log('Format:', this.getMetadata('General.Format'))
-    console.log('FrameRate:', this.getMetadata('General.FrameRate'))
-    console.log('OverallBitRate:', this.getMetadata('General.OverallBitRate'))
-    console.log('SamplingRate:', this.getMetadata('Audio.SamplingRate'))
   },
 
   getMetadata(key) {
