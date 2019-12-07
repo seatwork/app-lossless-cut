@@ -19,10 +19,23 @@ module.exports = {
     this.isLoaded = false
     this.isTranscoded = false
     this.startTime = 0
+    console.log('Format:', this.getMetadata('General.Format'))
+    console.log('FrameRate:', this.getMetadata('General.FrameRate'))
+    console.log('OverallBitRate:', this.getMetadata('General.OverallBitRate'))
+    console.log('SamplingRate:', this.getMetadata('Audio.SamplingRate'))
+  },
+
+  getMetadata(key) {
+    let i = 0, value = this.metadata
+    key = key.split('.')
+    while (value && i < key.length) {
+      value = value[key[i]]; i++
+    }
+    return util.isNumber(value) ? Number(value) : value
   },
 
   getDuration() {
-    return this.metadata.General.Duration
+    return this.getMetadata('General.Duration')
   },
 
   getCurrentTime() {
@@ -40,10 +53,10 @@ module.exports = {
   seek(timestamp) {
     if (timestamp === undefined) return
     if (timestamp < 0) timestamp = 0
-    if (timestamp > this.metadata.General.Duration) timestamp = this.metadata.General.Duration
+    if (timestamp > this.getDuration()) timestamp = this.getDuration()
 
     if (this.isTranscoded) {
-      this.src = host + '?source=' + this.source + '&fileSize=' + this.metadata.General.FileSize + '&startTime=' + timestamp
+      this.src = host + '?source=' + this.source + '&fileSize=' + this.getMetadata('General.FileSize') + '&startTime=' + timestamp
       this.startTime = timestamp
     } else {
       this.currentTime = timestamp

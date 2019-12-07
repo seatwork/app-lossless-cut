@@ -10,8 +10,9 @@ const electron = require('electron')
 const path = require('path')
 const util = require('./util')
 const ffmpeg = require('./ffmpeg')
+const Recorder = require('./recorder')
 const { alert, loading } = require('./component')
-const { dialog } = electron.remote
+const { dialog, getGlobal } = electron.remote
 
 const openFileBtn = $('#open-file')
 const currentTime = $('#currentTime')
@@ -37,9 +38,12 @@ const merger = $('.merger')
 const fileList = $('.merger ol')
 const mergeBtn = $('.merge')
 const cancelBtn = $('.cancel')
+const recordBtn = $('.record')
 
 const video = $('video')
 Object.assign(video, require('./video'))
+
+const recorder = new Recorder()
 
 /* --------------------------------------------------------
  * Renderer Events
@@ -119,6 +123,10 @@ mergeBtn.onclick = function() {
   ffmpeg.mergeVideos(video.sources)
 }
 
+recordBtn.onclick = function() {
+  recorder.show()
+}
+
 cancelBtn.onclick = function() {
   merger.style.display = 'none'
 }
@@ -169,6 +177,21 @@ document.onkeyup = function(e) {
   if (e.keyCode === 32) return play()   // SPACE
   if (e.keyCode === 37) return video.seek(video.getCurrentTime() - 1)  // LEFT
   if (e.keyCode === 39) return video.seek(video.getCurrentTime() + 1)  // RIGHT
+}
+
+/* --------------------------------------------------------
+ * Recorder Events
+ * ----------------------------------------------------- */
+
+recorder.onstart = function() {
+  const outputPath = getGlobal('path').desktop
+  recorder.process = ffmpeg.recordVideo(outputPath)
+  recorder.process.ontimeupdate = res => recorder.setDuration(res)
+  electron.ipcRenderer.send('put-in-tray')
+}
+
+recorder.onstop = function() {
+  recorder.process.stdin.write('q')
 }
 
 /* --------------------------------------------------------

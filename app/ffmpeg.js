@@ -26,14 +26,14 @@ function ffmpegCommand(args, options) {
   })
 
   process.stderr.on('data', stderr => {
-    const index = args.indexOf('-t')
-    if (index > -1) {
-      const duration = args[index + 1]
-      const match = / time\=(\d{2}:\d{2}:\d{2}\.\d{2,3}) /.exec(stderr)
+    const match = / time\=(\d{2}:\d{2}:\d{2}\.\d{2,3}) /.exec(stderr)
+    if (match) {
+      process.ontimeupdate && process.ontimeupdate(match[1])
 
-      if (match) {
-        const time = util.parseDuration(match[1])
-        const progress = Math.round((time / duration) * 100)
+      const index = args.indexOf('-t')
+      if (index > -1) {
+        const duration = args[index + 1]
+        const progress = Math.round((util.parseDuration(match[1]) / duration) * 100)
         loading(progress)
       }
     }
@@ -90,13 +90,7 @@ module.exports = {
     const segment = parseSegment(startTime, endTime)
     if (!segment) return
 
-    const audio = video.metadata.Audio
-    if (!audio) {
-      alert('This media does not contain any audio')
-      return
-    }
-
-    const bitrate = audio.BitRate ? Number(audio.BitRate) : 0
+    const bitrate = video.getMetadata('Audio.BitRate')
     const args = bitrate ? (bitrate > 320000 ? ['-b:a', '320k'] : ['-b:a', bitrate]) : ['-q:a', 0]
     const outputFile = formatOutputFile(video.source, startTime, endTime, '.mp3')
 
@@ -124,6 +118,11 @@ module.exports = {
     const videoList = videoPaths.map(path => "file '" + path + "'").join('\n')
     stringToStream(videoList).pipe(process.stdin)
     return process
+  },
+
+  recordVideo(outputPath) {
+    const outputFile = outputPath + '\\screen-record-' + Date.now() + '.mp4'
+    return ffmpegCommand(['-f', 'gdigrab', '-i', 'desktop', '-y', outputFile])
   },
 
   fastCodec(videoPath, fileSize, startTime) {
