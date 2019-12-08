@@ -47,9 +47,10 @@ module.exports = {
   },
 
   seek(timestamp) {
-    if (timestamp === undefined) return
+    if (!isNumber(timestamp)) return
     if (timestamp < 0) timestamp = 0
-    if (timestamp > this.getDuration()) timestamp = this.getDuration()
+    else if (timestamp > this.getDuration()) timestamp = this.getDuration()
+    else timestamp = timestamp.toFixed(3)
 
     if (this.isTranscoded) {
       this.src = host + '?source=' + this.source + '&fileSize=' + this.getMetadata('General.FileSize') + '&startTime=' + timestamp

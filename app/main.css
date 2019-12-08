@@ -77,6 +77,7 @@ main #open-file.ondrag {
   color: #999;
   background: #4a5560;
   cursor: default;
+  user-select: none;
 }
 
 .timeline #segment {

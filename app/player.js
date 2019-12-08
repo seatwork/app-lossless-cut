@@ -171,7 +171,6 @@ module.exports = class {
     segment.style.left = 0
     segment.style.right = '100%'
     playBtn.className = 'play'
-    // currentTime.innerHTML = '00:00:00.000'
     duration.innerHTML = '00:00:00.000'
     segmentStartTime.value = '00:00:00.000'
     segmentEndTime.value = '00:00:00.000'
