@@ -94,16 +94,16 @@ Object.assign(window, {
 
   parseDuration(str) {
     if (!str) return
-    const match = str.trim().match(/^(\d{2}):(\d{2}):(\d{2})\.(\d{2,3})$/)
+    const match = str.trim().match(/^(\d{2}):(\d{2}):(\d{2})(\.\d{2,3})$/)
 
     if (!match) return
     const hours = parseInt(match[1], 10)
     const minutes = parseInt(match[2], 10)
     const seconds = parseInt(match[3], 10)
-    const ms = parseInt(match[4], 10)
+    const ms = parseFloat(match[4])
 
     if (hours > 59 || minutes > 59 || seconds > 59) return
-    return ((((hours * 60) + minutes) * 60) + seconds) + (ms / 1000)
+    return (hours * 60 + minutes) * 60 + seconds + ms
   }
 
 })
