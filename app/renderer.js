@@ -9,43 +9,30 @@
 const electron = require('electron')
 const path = require('path')
 const ffmpeg = require('./ffmpeg')
-const Merge = require('./merge')
+const videoEnhanced = require('./video')
+const Player = require('./player')
+const Merger = require('./merger')
 const Recorder = require('./recorder')
-const { dialog, getGlobal } = electron.remote
 
+// Feature buttons
 const openFileBtn = $('#open-file')
-const currentTime = $('#currentTime')
-const timeline = $('.timeline')
-const duration = $('#duration')
-const progress = $('#progress')
-const segment = $('#segment')
-const cutStartTime = $('#cut-start-time')
-const cutEndTime = $('#cut-end-time')
-const playBtn = $('.play')
-const videoStartBtn = $('.video-start')
-const videoEndBtn = $('.video-end')
-const segmentStartBtn = $('.segment-start')
-const segmentEndBtn = $('.segment-end')
-const cutStartBtn = $('.cut-start')
-const cutEndBtn = $('.cut-end')
 const captureBtn = $('.capture')
 const extractBtn = $('.extract')
-const cutBtn = $('.cut')
 const convertBtn = $('.convert')
+const cutBtn = $('.cut')
 const openFilesBtn = $('.open-files')
-const recordBtn = $('.record')
+const openRecordBtn = $('.open-record')
+const helpBtn = $('.help')
 
-const video = $('video')
-Object.assign(video, require('./video'))
-
+// Components
+const { dialog, getGlobal } = electron.remote
+const video = Object.assign($('video'), videoEnhanced)
+const player = new Player(video)
+const merger = new Merger()
 const recorder = new Recorder()
-const merge = new Merge()
-merge.onmerge = function() {
-  ffmpeg.mergeVideos(video.sources)
-}
 
 /* --------------------------------------------------------
- * Renderer Events
+ * Open file events
  * ----------------------------------------------------- */
 
 openFileBtn.ondragover = function(e) {
@@ -77,90 +64,66 @@ openFileBtn.onclick = async function() {
 
 openFilesBtn.onclick = async function() {
   const { canceled, filePaths } = await openFileDialog(true)
-
   if (!canceled && filePaths && filePaths.length > 1) {
     video.sources = filePaths
-    merge.setFileList(filePaths)
+    merger.setFileList(filePaths)
   }
 }
 
-playBtn.onclick = play = function() {
-  if (video.paused) {
-    if (video.ended) video.seek(0)
-    video.play()
-    playBtn.className = 'pause'
-  } else {
-    video.pause()
-    playBtn.className = 'play'
-  }
-}
-
-cutBtn.onclick = function() {
-  ffmpeg.cutVideo(video.source, cutStartTime.value, cutEndTime.value)
-}
-
-convertBtn.onclick = function() {
-  ffmpeg.convertVideo(video.source, cutStartTime.value, cutEndTime.value)
-}
-
-extractBtn.onclick = function() {
-  ffmpeg.extractAudio(video, cutStartTime.value, cutEndTime.value)
-}
-
-captureBtn.onclick = function() {
-  ffmpeg.captureImage(video.source, video.getCurrentTime())
-}
-
-recordBtn.onclick = function() {
+openRecordBtn.onclick = function() {
   recorder.show()
 }
 
-timeline.onclick = function(e) {
-  if (video.getDuration() !== undefined)
-  video.seek(video.getDuration() * (e.clientX / this.offsetWidth))
+/* --------------------------------------------------------
+ * Feature Events
+ * ----------------------------------------------------- */
+
+captureBtn.onclick = function() {
+  ffmpeg.captureImage(video)
 }
 
-cutStartBtn.onclick = function() {
-  cutStartTime.value = formatDuration(video.getCurrentTime())
-  setSegment()
+extractBtn.onclick = function() {
+  ffmpeg.extractAudio(video, player.getSegmentStartTime(), player.getSegmentEndTime())
 }
 
-cutEndBtn.onclick = function() {
-  cutEndTime.value = formatDuration(video.getCurrentTime())
-  setSegment()
+convertBtn.onclick = function() {
+  ffmpeg.convertVideo(video.source, player.getSegmentStartTime(), player.getSegmentEndTime())
 }
 
-segmentStartBtn.onclick = function() {
-  video.seek(parseDuration(cutStartTime.value))
+cutBtn.onclick = function() {
+  ffmpeg.cutVideo(video.source, player.getSegmentStartTime(), player.getSegmentEndTime())
 }
 
-segmentEndBtn.onclick = function() {
-  video.seek(parseDuration(cutEndTime.value))
-}
-
-videoStartBtn.onclick = function() {
-  video.seek(0)
-}
-
-videoEndBtn.onclick = function() {
-  video.seek(video.getDuration())
-}
-
-cutStartTime.oninput = cutEndTime.oninput = function onTimeChange() {
-  video.seek(parseDuration(this.value))
-  setSegment()
-}
-
-$('.help').onclick = function() {
+helpBtn.onclick = function() {
   electron.shell.openExternal('https://github.com/seatwork/lossless-cut')
 }
 
-document.onkeyup = function(e) {
-  e.preventDefault()
-  if (video.getDuration() === undefined) return
-  if (e.keyCode === 32) return play()   // SPACE
-  if (e.keyCode === 37) return video.seek(video.getCurrentTime() - 1)  // LEFT
-  if (e.keyCode === 39) return video.seek(video.getCurrentTime() + 1)  // RIGHT
+/* --------------------------------------------------------
+ * Player Events
+ * ----------------------------------------------------- */
+
+player.onload = function() {
+  openFileBtn.style.opacity = 0
+  cutBtn.disabled = false
+  captureBtn.disabled = false
+  extractBtn.disabled = false
+  convertBtn.disabled = false
+}
+
+player.onerror = function() {
+  openFileBtn.style.opacity = 1
+  cutBtn.disabled = true
+  captureBtn.disabled = true
+  extractBtn.disabled = true
+  convertBtn.disabled = true
+}
+
+/* --------------------------------------------------------
+ * Merger Events
+ * ----------------------------------------------------- */
+
+merger.onmerge = function() {
+  ffmpeg.mergeVideos(video.sources)
 }
 
 /* --------------------------------------------------------
@@ -168,7 +131,7 @@ document.onkeyup = function(e) {
  * ----------------------------------------------------- */
 
 recorder.onstart = function() {
-  const outputPath = getGlobal('path').desktop
+  const outputPath = getGlobal('desktop')
   recorder.process = ffmpeg.recordVideo(outputPath)
   recorder.process.ontimeupdate = res => recorder.setDuration(res)
   electron.ipcRenderer.send('create-tray')
@@ -177,60 +140,6 @@ recorder.onstart = function() {
 recorder.onstop = function() {
   recorder.process.stdin.write('q')
   electron.ipcRenderer.send('remove-tray')
-}
-
-/* --------------------------------------------------------
- * Video Events
- * ----------------------------------------------------- */
-
-video.onloadstart = function() {
-  loading(true)
-  disableBtns(true)
-  if (video.getDuration() == undefined) {
-    resetControls()
-  }
-}
-
-video.onloadedmetadata = function() {
-  if (!video.isLoaded) {
-    video.isLoaded = true
-    openFileBtn.style.opacity = 0
-    segment.style.left = 0
-    segment.style.right = '100%'
-    playBtn.className = 'play'
-    duration.innerHTML = cutEndTime.value = formatDuration(video.getDuration())
-    showMetadataOnTitle()
-  }
-}
-
-video.oncanplay = function() {
-  loading(false)
-  disableBtns(false)
-  if (playBtn.className == 'pause') {
-    video.play()
-  }
-}
-
-video.ontimeupdate = function() {
-  currentTime.innerHTML = formatDuration(video.getCurrentTime())
-  progress.style.left = (video.getCurrentTime() / video.getDuration()) * 100 + '%'
-}
-
-video.onended = function() {
-  video.pause()
-  playBtn.className = 'play'
-}
-
-video.onerror = function(e) {
-  if (video.isTranscoded) {
-    alert('Unsupported video format')
-    loading(false)
-    disableBtns(true)
-    resetControls()
-  } else {
-    alert('This video needs transcoding, playback will be slower')
-    video.transcode()
-  }
 }
 
 /* --------------------------------------------------------
@@ -249,49 +158,4 @@ function openFileDialog(multiple = false) {
       { name: 'All Files', extensions: ['*'] }
     ]
   })
-}
-
-function setSegment() {
-  segment.style.left = (parseDuration(cutStartTime.value) / video.getDuration()) * 100 + '%'
-  segment.style.right = (100 - (parseDuration(cutEndTime.value) / video.getDuration()) * 100) + '%'
-}
-
-function resetControls() {
-  progress.style.left = 0
-  openFileBtn.style.opacity = 1
-  segment.style.left = 0
-  segment.style.right = '100%'
-  playBtn.className = 'play'
-  duration.innerHTML = '00:00:00.000'
-  cutStartTime.value = '00:00:00.000'
-  cutEndTime.value = '00:00:00.000'
-}
-
-function disableBtns(bool) {
-  playBtn.disabled = bool
-  videoStartBtn.disabled = bool
-  videoEndBtn.disabled = bool
-  segmentStartBtn.disabled = bool
-  segmentEndBtn.disabled = bool
-  cutStartBtn.disabled = bool
-  cutEndBtn.disabled = bool
-  cutStartTime.disabled = bool
-  cutEndTime.disabled = bool
-  captureBtn.disabled = bool
-  extractBtn.disabled = bool
-  cutBtn.disabled = bool
-  convertBtn.disabled = bool
-}
-
-function showMetadataOnTitle() {
-  let format = video.getMetadata('General.Format') || ''
-  let frameRate = video.getMetadata('General.FrameRate')
-  let bitRate = video.getMetadata('General.OverallBitRate')
-  let samplingRate = video.getMetadata('Audio.SamplingRate')
-
-  const metadata = [ format ]
-  if (frameRate) metadata.push(parseFloat(frameRate.toFixed(2)) + 'fps')
-  if (bitRate)  metadata.push(Math.round(bitRate / 1000) + 'kbps')
-  if (samplingRate)  metadata.push(parseFloat((samplingRate / 1000).toFixed(1)) + 'kHz')
-  electron.ipcRenderer.send('change-title', metadata.join(', '))
 }

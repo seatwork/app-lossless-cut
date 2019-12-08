@@ -1,15 +1,15 @@
 /**
  * --------------------------------------------------------
  * Preload and Enhancements
+ *
+ * All of the Node.js APIs are available in the preload process.
+ * It has the same sandbox as a Chrome extension.
+ *
  * Author: Aichen
  * Copyright (c) 2019 Cloudseat.net
  * --------------------------------------------------------
  */
 
-/**
- * All of the Node.js APIs are available in the preload process.
- * It has the same sandbox as a Chrome extension.
- */
 window.addEventListener('DOMContentLoaded', () => {
 
   // Create elements for alert

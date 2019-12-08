@@ -5,7 +5,6 @@
  * Copyright (c) 2019 Cloudseat.net
  * --------------------------------------------------------
  */
-
 module.exports = class {
 
   constructor() {
@@ -53,15 +52,13 @@ module.exports = class {
   }
 
   onmaskclick(e) {
-    if (e.currentTarget === e.target) this.hide()
+    if (e.currentTarget === e.target) {
+      this.container.classList.remove('visible')
+    }
   }
 
   show() {
     this.container.classList.add('visible')
-  }
-
-  hide() {
-    this.container.classList.remove('visible')
   }
 
 }

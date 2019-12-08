@@ -17,6 +17,10 @@ body {
   font-size: 14px;
 }
 
+/* --------------------------------------------------------
+ * Main Layout
+ * ----------------------------------------------------- */
+
 main {
   position: fixed;
   top: 0;
@@ -32,7 +36,7 @@ main video {
   max-width: 100%;
 }
 
-main div {
+main #open-file {
   position: absolute;
   top: 60px;
   bottom: 60px;
@@ -48,9 +52,13 @@ main div {
   transition: all 0.3s;
 }
 
-main div.ondrag {
+main #open-file.ondrag {
   background: rgba(74, 85, 96, 0.2);
 }
+
+/* --------------------------------------------------------
+ * Toolbar Layout
+ * ----------------------------------------------------- */
 
 .toolbar {
   position: fixed;
@@ -103,9 +111,13 @@ main div.ondrag {
 
 .controls, .features {
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
 }
+
+/* --------------------------------------------------------
+ * Merger Component
+ * ----------------------------------------------------- */
 
 .merger {
   position: fixed;
@@ -153,8 +165,22 @@ main div.ondrag {
   align-items: center;
 }
 
+.merger button {
+  width: 100px;
+  margin: 0 10px;
+  color: #fff;
+}
+
+.merger button.merge {
+  background: rgb(200, 2, 100);
+}
+
+.merger button.cancel {
+  background: #999;
+}
+
 /* --------------------------------------------------------
- * recorder Component
+ * Recorder Component
  * ----------------------------------------------------- */
 
 .recorder {
@@ -209,7 +235,7 @@ main div.ondrag {
 }
 
 /* --------------------------------------------------------
- * Loading
+ * Loading Component
  * ----------------------------------------------------- */
 
 .loading {
@@ -250,6 +276,37 @@ main div.ondrag {
 }
 
 /* --------------------------------------------------------
+ * Alert Component
+ * ----------------------------------------------------- */
+
+.message {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  width: 100%;
+  height: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.message>div {
+  position: absolute;
+  z-index: 999;
+  top: -100px;
+  color: #fff;
+  background: rgba(238, 77, 55, 0.8);
+  padding: 10px 20px;
+  border-radius: 3px;
+  transition: top .5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+.message>div.visible {
+  top: 40px;
+}
+
+/* --------------------------------------------------------
  * Control Buttons
  * ----------------------------------------------------- */
 
@@ -268,20 +325,6 @@ button {
   transition: all .3s;
 }
 
-button.merge, button.cancel {
-  width: 100px;
-  margin: 0 10px;
-  color: #fff;
-}
-
-button.merge {
-  background: rgb(200, 2, 100);
-}
-
-button.cancel {
-  background: #999;
-}
-
 button:hover {
   opacity: 1;
 }
@@ -291,7 +334,7 @@ button:disabled, button:disabled:hover {
   cursor: default;
 }
 
-button.cut-start, button.cut-end {
+button.segment-start, button.segment-end {
   width: 30px;
 }
 
@@ -353,41 +396,10 @@ button.open-files {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 1050 1024' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M870.75 1024a161.684 161.684 0 0 0 161.685-161.684V161.684A161.684 161.684 0 0 0 870.75 0H170.12A161.684 161.684 0 0 0 8.435 161.684v700.632A161.684 161.684 0 0 0 170.119 1024h428.948V916.21H170.119a53.895 53.895 0 0 1-53.895-53.894V161.684a53.895 53.895 0 0 1 53.895-53.895H870.75a53.895 53.895 0 0 1 53.895 53.895v700.632a53.895 53.895 0 0 1-53.895 53.895V1024z' fill='%23333'/%3E%3Cpath d='M116.224 296.421h808.421v107.79H116.224z' fill='%23333'/%3E%3Cpath d='M170.119 104.502l95.178-50.607 139.156 261.713-95.178 50.607zm215.579 0l95.178-50.607 139.156 261.713-95.178 50.607zm215.579 0l95.178-50.607L835.61 315.608l-95.178 50.607zM670.53 669.83L480.39 783.925a26.947 26.947 0 0 1-40.799-23.094v-228.19a26.947 26.947 0 0 1 40.799-23.094l190.167 114.095a26.947 26.947 0 0 1 0 46.188zm146.326 300.275a53.895 53.895 0 1 0 107.79 0 53.895 53.895 0 1 0-107.79 0zm-269.474 0a53.895 53.895 0 1 0 107.79 0 53.895 53.895 0 1 0-107.79 0zm161.684 0a26.947 26.947 0 1 0 53.895 0 26.947 26.947 0 1 0-53.895 0z' fill='%23333'/%3E%3C/svg%3E")
 }
 
-button.record {
+button.open-record {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 1024 1024' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M512 896a384 384 0 1 0 0-768 384 384 0 0 0 0 768zm0 128A512 512 0 1 1 512 0a512 512 0 0 1 0 1024zM384 320h256a64 64 0 0 1 64 64v256a64 64 0 0 1-64 64H384a64 64 0 0 1-64-64V384a64 64 0 0 1 64-64z' fill='%23333'/%3E%3C/svg%3E")
 }
 
 button.help {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 1024 1024' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M460.8 819.2h102.4V716.8H460.8v102.4zM512 0C229.376 0 0 229.376 0 512s229.376 512 512 512 512-229.376 512-512S794.624 0 512 0zm0 921.6c-225.792 0-409.6-183.808-409.6-409.6S286.208 102.4 512 102.4 921.6 286.208 921.6 512 737.792 921.6 512 921.6zm0-716.8c-113.152 0-204.8 91.648-204.8 204.8h102.4c0-56.32 46.08-102.4 102.4-102.4s102.4 46.08 102.4 102.4c0 102.4-153.6 89.6-153.6 256h102.4c0-115.2 153.6-128 153.6-256 0-113.152-91.648-204.8-204.8-204.8z' fill='%23333'/%3E%3C/svg%3E")
-}
-
-/* --------------------------------------------------------
- * Alert Message
- * ----------------------------------------------------- */
-
-.message {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  width: 100%;
-  height: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.message>div {
-  position: absolute;
-  z-index: 999;
-  top: -100px;
-  color: #fff;
-  background: rgba(238, 77, 55, 0.8);
-  padding: 10px 20px;
-  border-radius: 3px;
-  transition: top .5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-}
-
-.message>div.visible {
-  top: 40px;
 }

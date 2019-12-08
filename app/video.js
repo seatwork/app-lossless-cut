@@ -1,6 +1,6 @@
 /**
  * --------------------------------------------------------
- * Video Transcode Extension
+ * Video Enhancements
  * Author: Aichen
  * Copyright (c) 2019 Cloudseat.net
  * --------------------------------------------------------
@@ -16,9 +16,17 @@ module.exports = {
     this.metadata = await ffmpeg.getMediaInfo(source)
     this.source = source
     this.src = source
-    this.isLoaded = false
     this.isTranscoded = false
     this.startTime = 0
+    this.onchange && this.onchange()
+  },
+
+  getDuration() {
+    return this.getMetadata('General.Duration')
+  },
+
+  getCurrentTime() {
+    return this.currentTime + this.startTime
   },
 
   getMetadata(key) {
@@ -28,14 +36,6 @@ module.exports = {
       value = value[key[i]]; i++
     }
     return isNumber(value) ? Number(value) : value
-  },
-
-  getDuration() {
-    return this.getMetadata('General.Duration')
-  },
-
-  getCurrentTime() {
-    return this.currentTime + this.startTime
   },
 
   transcode() {

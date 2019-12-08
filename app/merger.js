@@ -1,11 +1,10 @@
 /**
  * --------------------------------------------------------
- * Recorder Component
+ * Merger Component
  * Author: Aichen
  * Copyright (c) 2019 Cloudseat.net
  * --------------------------------------------------------
  */
-
 module.exports = class {
 
   constructor() {

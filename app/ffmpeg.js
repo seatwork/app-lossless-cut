@@ -100,10 +100,11 @@ module.exports = {
     ])
   },
 
-  captureImage(videoPath, timestamp) {
-    const outputFile = formatOutputFile(videoPath, formatDuration(timestamp), 1, '.jpg')
+  captureImage(video) {
+    const currentTime = formatDuration(video.getCurrentTime())
+    const outputFile = formatOutputFile(video.source, currentTime, 1, '.jpg')
     return ffmpegCommand([
-      '-ss', timestamp, '-i', videoPath, '-vframes', 1,
+      '-ss', currentTime, '-i', video.source, '-vframes', 1,
       '-f', 'mjpeg', '-q:v', 2, '-y', outputFile
     ])
   },
@@ -121,7 +122,7 @@ module.exports = {
   },
 
   recordVideo(outputPath) {
-    const outputFile = outputPath + '\\screen-record-' + Date.now() + '.mp4'
+    const outputFile = outputPath + '\\screen-record-' + (new Date()).format() + '.mp4'
     return ffmpegCommand(['-f', 'gdigrab', '-i', 'desktop', '-y', outputFile])
   },
 

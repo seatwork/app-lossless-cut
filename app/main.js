@@ -13,9 +13,7 @@ const emptyIcon = electron.nativeImage.createEmpty()
 const app = electron.app
 
 let mainWindow, tray
-global.path = {
-  desktop: app.getPath('desktop')
-}
+global.desktop = app.getPath('desktop')
 
 /* --------------------------------------------------------
  * Create Main Window
