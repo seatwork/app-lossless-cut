@@ -25,7 +25,7 @@ const openRecordBtn = $('.open-record')
 const helpBtn = $('.help')
 
 // Components
-const { dialog, getGlobal } = electron.remote
+const { dialog } = electron.remote
 const video = Object.assign($('video'), videoEnhanced)
 const player = new Player(video)
 const merger = new Merger()
@@ -124,22 +124,6 @@ player.onerror = function() {
 
 merger.onmerge = function() {
   ffmpeg.mergeVideos(video.sources)
-}
-
-/* --------------------------------------------------------
- * Recorder Events
- * ----------------------------------------------------- */
-
-recorder.onstart = function() {
-  const outputPath = getGlobal('desktop')
-  recorder.process = ffmpeg.recordVideo(outputPath)
-  recorder.process.ontimeupdate = res => recorder.setDuration(res)
-  electron.ipcRenderer.send('create-tray')
-}
-
-recorder.onstop = function() {
-  recorder.process.stdin.write('q')
-  electron.ipcRenderer.send('remove-tray')
 }
 
 /* --------------------------------------------------------

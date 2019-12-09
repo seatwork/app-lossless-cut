@@ -5,8 +5,12 @@
  * Copyright (c) 2019 Cloudseat.net
  * --------------------------------------------------------
  */
-module.exports = class {
 
+const electron = require('electron')
+const ffmpeg = require('./ffmpeg')
+const outputPath = electron.remote.getGlobal('desktop')
+
+module.exports = class {
   constructor() {
     this.container = $(`
       <div class="recorder"><div>
@@ -19,36 +23,39 @@ module.exports = class {
     this.duration = this.container.$('.duration')
     this.startBtn = this.container.$('button.start')
     this.stopBtn = this.container.$('button.stop')
-    this.started = false
     document.body.appendChild(this.container)
 
     this.container.onclick = e => this.onmaskclick(e)
-    this.startBtn.onclick = () => {
-      this.switch()
-      this.onstart()
-    }
-    this.stopBtn.onclick = () => {
-      this.switch()
-      this.onstop()
-    }
+    this.startBtn.onclick = () => this.createProcess()
+    this.stopBtn.onclick = () => this.exitProcess()
   }
 
-  setDuration(time) {
-    this.duration.innerHTML = time
-  }
+  createProcess() {
+    this.startBtn.disabled = true
+    this.process = ffmpeg.recordVideo(outputPath)
 
-  switch() {
-    if (this.started) {
+    this.process.ontimeupdate = res => {
+      this.duration.innerHTML = res
+      if (!this.started) {
+        this.started = true
+        this.startBtn.style.display = 'none'
+        this.stopBtn.style.display = 'block'
+        this.container.onclick = null
+        electron.ipcRenderer.send('create-tray')
+      }
+    }
+    this.process.on('exit', () => {
       this.started = false
+      this.startBtn.disabled = false
       this.startBtn.style.display = 'block'
       this.stopBtn.style.display = 'none'
       this.container.onclick = e => this.onmaskclick(e)
-    } else {
-      this.started = true
-      this.startBtn.style.display = 'none'
-      this.stopBtn.style.display = 'block'
-      this.container.onclick = null
-    }
+    })
+  }
+
+  exitProcess() {
+    this.process.stdin.write('q')
+    electron.ipcRenderer.send('remove-tray')
   }
 
   onmaskclick(e) {
