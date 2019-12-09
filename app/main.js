@@ -1,6 +1,6 @@
 /**
  * --------------------------------------------------------
- * Lossless Cut Main Process
+ * Application Main Process
  * Author: Aichen
  * Copyright (c) 2019 Cloudseat.net
  * --------------------------------------------------------
