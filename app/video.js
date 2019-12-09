@@ -50,7 +50,6 @@ module.exports = {
     if (!isNumber(timestamp)) return
     if (timestamp < 0) timestamp = 0
     else if (timestamp > this.getDuration()) timestamp = this.getDuration()
-    else timestamp = timestamp.toFixed(3)
 
     if (this.isTranscoded) {
       this.src = host + '?source=' + this.source + '&fileSize=' + this.getMetadata('General.FileSize') + '&startTime=' + timestamp

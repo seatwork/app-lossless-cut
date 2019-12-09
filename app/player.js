@@ -6,6 +6,8 @@
  * --------------------------------------------------------
  */
 
+const Wave = require('./wave')
+
 const timeline = $('.timeline')
 const currentTime = $('#currentTime')
 const duration = $('#duration')
@@ -23,7 +25,9 @@ const cutStartBtn = $('.cut-start')
 const cutEndBtn = $('.cut-end')
 
 module.exports = class {
+
   constructor(video) {
+    this.wave = new Wave(video, $('canvas'))
 
     function createSegment() {
       segment.style.left = (parseDuration(segmentStartTime.value) / video.getDuration()) * 100 + '%'
@@ -82,6 +86,12 @@ module.exports = class {
       if (video.getDuration()) {
         duration.innerHTML = segmentEndTime.value = formatDuration(video.getDuration())
         this.showMetadataOnTitle()
+      }
+      if (video.getMetadata('Audio') && !video.getMetadata('Video')) {
+        this.wave.play()
+      } else {
+        this.wave.pause()
+        this.wave.hide()
       }
     }
 
