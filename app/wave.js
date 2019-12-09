@@ -8,8 +8,8 @@
 
 module.exports = class {
 
-  constructor(audioSource, canvasElement, options) {
-    this.source = audioSource
+  constructor(audioElement, canvasElement, options) {
+    this.audioElement = audioElement
     this.canvasElement = canvasElement
     this.canvas = canvasElement.getContext('2d')
     this.options = Object.assign({
@@ -49,9 +49,7 @@ module.exports = class {
 
   _init() {
     const audioContext = new AudioContext()
-    const audioSource = this._isStreamSource(this.source)
-      ? audioContext.createMediaStreamSource(this.source)
-      : audioContext.createMediaElementSource(this.source)
+    const audioSource = audioContext.createMediaElementSource(this.audioElement)
 
     this.analyser = audioContext.createAnalyser()
     audioSource.connect(this.analyser)
@@ -126,10 +124,6 @@ module.exports = class {
 
       this.canvas.fillRect(left, top, width, height)
     })
-  }
-
-  _isStreamSource(src) {
-    return Object.prototype.toString.call(src) === '[object MediaStream]'
   }
 
 }
