@@ -6,8 +6,6 @@
  * --------------------------------------------------------
  */
 
-const song = 'e:\\desktop\\Dr.Hook - Sharing The Night Together.flac'
-
 module.exports = class {
 
   constructor(audioSource, canvasElement, options) {
