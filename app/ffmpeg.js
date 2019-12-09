@@ -121,9 +121,16 @@ module.exports = {
     return process
   },
 
-  recordVideo(outputPath) {
+  async recordVideo(outputPath) {
     const outputFile = outputPath + '\\screen-record-' + (new Date()).format() + '.mp4'
-    return ffmpegCommand(['-f', 'gdigrab', '-i', 'desktop', '-y', outputFile])
+    const audioDevice = await this.getAudioDevice()
+    const audioArgs = audioDevice ? ['-f', 'dshow', '-i', 'audio=' + audioDevice] : []
+
+    return ffmpegCommand([
+      '-f', 'gdigrab', '-i', 'desktop', ...audioArgs,
+      '-c:v', 'libx264', '-c:a', 'aac', '-q:a', 0,
+      '-y', outputFile
+    ])
   },
 
   fastCodec(videoPath, fileSize, startTime) {
@@ -133,6 +140,22 @@ module.exports = {
       '-f', 'mp4', '-frag_duration', 1000000, 'pipe:1',
     ], {
       encoding: 'buffer', maxBuffer: Number(fileSize),
+    })
+  },
+
+  getAudioDevice() {
+    return new Promise(resolve => {
+      execFile(ffmpeg, ['-list_devices', 'true', '-f', 'dshow', '-i', 'dummy'], (error, stdout, stderr) => {
+        const lines = stderr.split('\n')
+        lines.some((line, i) => {
+          let match = /^\[dshow.+\] DirectShow audio devices$/.exec(line.trim())
+          if (match) {
+            match = /^\[dshow.+\] +"(.+)"$/.exec(lines[i+1].trim())
+            if (match) resolve(match[1])
+            return true
+          }
+        })
+      })
     })
   },
 

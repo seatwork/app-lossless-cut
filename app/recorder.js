@@ -30,9 +30,9 @@ module.exports = class {
     this.stopBtn.onclick = () => this.exitProcess()
   }
 
-  createProcess() {
+  async createProcess() {
     this.startBtn.disabled = true
-    this.process = ffmpeg.recordVideo(outputPath)
+    this.process = await ffmpeg.recordVideo(outputPath)
 
     this.process.ontimeupdate = res => {
       this.duration.innerHTML = res
