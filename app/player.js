@@ -163,7 +163,7 @@ module.exports = class {
     if (frameRate) metadata.push(parseFloat(frameRate.toFixed(2)) + 'fps')
     if (bitRate)  metadata.push(Math.round(bitRate / 1000) + 'kbps')
     if (samplingRate)  metadata.push(parseFloat((samplingRate / 1000).toFixed(1)) + 'kHz')
-    electron.ipcRenderer.send('change-title', metadata.join(', '))
+    document.title = electron.remote.app.name + '  |  ' + metadata.join(', ')
   }
 
   resetControls() {

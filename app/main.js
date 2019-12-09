@@ -95,10 +95,6 @@ if (!gotTheLock) { app.quit() } else {
  * IPC Events
  * ----------------------------------------------------- */
 
-electron.ipcMain.on('change-title', (event, arg) => {
-  mainWindow.setTitle(app.name + '  |  ' + arg)
-})
-
 electron.ipcMain.on('create-tray', () => {
   tray = new electron.Tray(appIcon)
   tray.setToolTip('Recording...')
