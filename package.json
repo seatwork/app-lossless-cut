@@ -11,7 +11,7 @@
     "package": "electron-packager . --icon=app/assets/logo.ico --asar --app-version=1.0.0 --overwrite"
   },
   "devDependencies": {
-    "electron": "^7.1.4"
+    "electron": "^7.2.4"
   },
   "dependencies": {
     "string-to-stream": "^3.0.1"
