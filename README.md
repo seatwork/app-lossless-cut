@@ -13,7 +13,7 @@
 - 以最小文件最高质量将视频帧截取为图片
 - 录制屏幕及麦克风输入
 - 音频声波可视化
-- 仅支持 Windows 平台
+- 支持 Windows/Linux 平台
 
 ## 快捷键
 
@@ -31,34 +31,31 @@ SPACE | 空格键 | 播放/暂停
 
 ## 安装使用
 
-至 [Lossless-Cut Release](https://github.com/seatwork/lossless-cut/releases) 页面下载最新版本的压缩包，解压后直接运行 exe 文件即可。
+至 [Lossless-Cut Release](https://github.com/seatwork/lossless-cut/releases) 页面下载相应平台的压缩包，解压后直接运行即可。
 
 ## 开发构建
 
-#### 1. 安装 Node
+### 1. 安装 NodeJS
 
 访问 [Node.js 下载页面](https://nodejs.org/en/download)，选择 Windows Installer。 下载完成后执行安装程序，根据引导完成安装即可。在安装过程中的配置界面, 请勾选 Node.js runtime、npm package manager 和 Add to PATH 这三个选项。通过 `node -v` 和 `npm -v` 命令来确认 node 和 npm 已经安装成功。
 
-#### 2. 安装 Electron
+### 2. 安装依赖
 
-推荐的安装方法是把它作为项目中的开发依赖项，以便能在不同的 app 中使用不同的 Electron 版本。 在项目所在目录中运行下面的命令：
+推荐的安装方法是把它作为项目中的开发依赖项，以便能在不同的 app 中使用不同的 Electron 版本。 在项目所在目录中运行下面的命令（使用淘宝 Electron 镜像）：
 ```
-npm install --save-dev electron
-```
-
-#### 3. 调试打包
-
-在项目目录下运行如下命令：
-```
-# 使用淘宝 Electron 镜像
 export ELECTRON_MIRROR="https://npm.taobao.org/mirrors/electron/"
-
-# 安装依赖
 npm install
-# 调试运行
+```
+
+### 3. 调试运行
+```
 npm start
-# 构建打包
-npm run package
+```
+
+### 4. 构建打包
+```
+npm run build:linux
+npm run build:win
 ```
 
 ## 遇过的坑

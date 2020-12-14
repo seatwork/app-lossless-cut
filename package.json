@@ -9,7 +9,8 @@
 
     "scripts": {
         "start": "electron .",
-        "build": "electron-builder -l"
+        "build:linux": "electron-builder -l",
+        "build:win": "electron-builder -w"
     },
 
     "build": {
