@@ -37,7 +37,7 @@ SPACE | 空格键 | 播放/暂停
 
 #### 1. 安装 Node
 
-访问 [Node.js下载页面](https://nodejs.org/en/download)，选择Windows Installer。 下载完成后执行安装程序，根据引导完成安装即可。在安装过程中的配置界面, 请勾选Node.js runtime、npm package manager和Add to PATH这三个选项。通过 `node -v` 和 `npm -v` 命令来确认 node 和 npm 已经安装成功。
+访问 [Node.js 下载页面](https://nodejs.org/en/download)，选择 Windows Installer。 下载完成后执行安装程序，根据引导完成安装即可。在安装过程中的配置界面, 请勾选 Node.js runtime、npm package manager 和 Add to PATH 这三个选项。通过 `node -v` 和 `npm -v` 命令来确认 node 和 npm 已经安装成功。
 
 #### 2. 安装 Electron
 
@@ -50,6 +50,9 @@ npm install --save-dev electron
 
 在项目目录下运行如下命令：
 ```
+# 使用淘宝 Electron 镜像
+export ELECTRON_MIRROR="https://npm.taobao.org/mirrors/electron/"
+
 # 安装依赖
 npm install
 # 调试运行

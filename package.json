@@ -1,19 +1,38 @@
 {
-  "name": "Lossless-Cut",
-  "version": "1.0.0",
-  "description": "Lossless video cutter and merger",
-  "author": "AiChen",
-  "copyright": "Copyright (C) 2019, Cloudseat",
-  "license": "MIT",
-  "main": "app/main.js",
-  "scripts": {
-    "start": "electron .",
-    "package": "electron-packager . --icon=app/assets/logo.ico --asar --app-version=1.0.0 --overwrite"
-  },
-  "devDependencies": {
-    "electron": "^7.1.4"
-  },
-  "dependencies": {
-    "string-to-stream": "^3.0.1"
-  }
+    "name": "Lossless-Cut",
+    "version": "1.5.0",
+    "description": "Lossless video cutter and merger",
+    "author": "Ai Chen <nobody@cloudseat.net>",
+    "copyright": "Copyright (C) 2019, Cloudseat",
+    "license": "MIT",
+    "main": "app/main.js",
+
+    "scripts": {
+        "start": "electron .",
+        "build": "electron-builder -l"
+    },
+
+    "build": {
+        "appId": "net.cloudseat.lossless-cut",
+        "win": {
+            "icon": "app/assets/logo.png",
+            "target": [
+                "nsis"
+            ]
+        },
+        "linux": {
+            "icon": "app/assets/logo.png",
+            "target": [
+                "deb"
+            ]
+        }
+    },
+
+    "devDependencies": {
+        "electron": "^7.1.4",
+        "electron-builder": "^22.9.1"
+    },
+    "dependencies": {
+        "string-to-stream": "^3.0.1"
+    }
 }

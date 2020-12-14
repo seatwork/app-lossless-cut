@@ -1,2 +1,3 @@
 node_modules/
-Lossless-Cut-win32-x64/
+dist/
+package-lock.json

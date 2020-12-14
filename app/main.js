@@ -8,7 +8,7 @@
 
 const electron = require('electron')
 const path = require('path')
-const appIcon = path.join(__dirname, 'assets/logo.ico')
+const appIcon = path.join(__dirname, 'assets/logo.png')
 const emptyIcon = electron.nativeImage.createEmpty()
 const app = electron.app
 
