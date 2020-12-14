@@ -58,6 +58,17 @@ npm run build:linux
 npm run build:win
 ```
 
+Windows 下构建需将 `app/ffmpeg.js` 中以下内容
+```
+const ffmpeg = path.join(__dirname, 'bin/ffmpeg')
+const mediainfo = path.join(__dirname, 'bin/mediainfo')
+```
+改为
+```
+const ffmpeg = path.join(__dirname, 'bin/ffmpeg.exe')
+const mediainfo = path.join(__dirname, 'bin/mediainfo.exe')
+```
+
 ## 遇过的坑
 
 - 打包成 asar 档案后，fluent-ffmpeg 无法运行档案中的 exe 命令（即 ffmpeg.exe），查遍相关资料发现，fluent-ffmpeg 中启动子进程使用的 `spawn` 方法无法读取 asar 档案中的二进制文件，但 `execFile` 方式可以，于是弃用 fluent-ffmpeg 模块，自己改写 ffmpeg.js。
