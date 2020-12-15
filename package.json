@@ -16,13 +16,11 @@
     "build": {
         "appId": "net.cloudseat.lossless-cut",
         "win": {
-            "icon": "app/assets/logo.png",
             "target": [
                 "nsis"
             ]
         },
         "linux": {
-            "icon": "app/assets/logo.png",
             "target": [
                 "deb"
             ]
