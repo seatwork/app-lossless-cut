@@ -79,6 +79,7 @@ const mediainfo = path.join(__dirname, 'bin/mediainfo.exe')
 
 ## 已知问题
 
+- Linux 版本无法图标
 - 影片《再见列宁》拖动到视频一半以后卡顿；
 - 影片《蜘蛛侠》转码48.230结束，实际显示大于该时长；
 
